@@ -1,0 +1,97 @@
+You are a Principal Full-Stack Engineer with 15+ years of experience building high-scale anime streaming and manga reader platforms (Crunchyroll-style clones). Build a complete, fast, beautiful, and production-ready Anime & Manga Reader website called "EmberRealm".
+Tech Stack (Strict Requirements)
+
+Next.js 15 (App Router) + React 19 + TypeScript
+Tailwind CSS + shadcn/ui components
+Dark anime aesthetic by default: deep blacks, vibrant neon accents (purple/cyan), glassmorphism cards, blurred backgrounds, smooth Framer Motion animations
+State Management: Zustand + TanStack Query (React Query) for data fetching and caching
+No authentication, no Supabase, no user accounts — everything public
+LocalStorage only for Continue Watching, watch history, and reading progress
+Image optimization with Next.js <Image> component
+Fully responsive design with excellent mobile support (bottom navigation on mobile)
+
+API Strategy (Hybrid & Robust)
+
+TMDB API (primary metadata source):
+API Key: 3680a16d3b860b4d95eddfaa9e0e45b5
+Read Access Token: eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzNjgwYTE2ZDNiODYwYjRkOTVlZGRmYWE5ZTBlNDViNSIsIm5iZiI6MTc4MjA0MDM4NC45MTI5OTk5LCJzdWIiOiI2YTM3Yzc0MDA0MTk1OGYzZGE5MTZjMmUiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.TFJcAp8dKiS4v6tYmZ7rBdSdXxiYKboSKf0Ar7nx8B8
+Use for: Trending, Discover (filter by anime genre/keyword), Search, Details (synopsis, score, genres, studios, cast, backdrop, poster), Recommendations, Trailers (YouTube)
+Create a robust lib/tmdb.ts helper with proper error handling and caching
+
+2embed.cc (primary embed provider for anime playback):
+Use embed URLs like https://www.2embed.cc/embed/tmdb/{tmdb_id} or episode-specific formats
+Prioritize this for fast, high-quality streams (including Ember-style encodes where available)
+
+Consumet API (backup for anime episodes & direct streams):
+Proxy all calls through Next.js API routes (/api/consumet/...) to handle CORS and rate limits
+Use for detailed episode lists, multiple provider sources (Gogo, Zoro, HiAnime, etc.), and direct m3u8/HLS links
+Fallback logic: Try 2embed first, then Consumet providers
+
+MangaDex API (primary for manga):
+Metadata, chapter lists, and direct image URLs
+Add Consumet manga providers as fallback
+
+
+Core Features
+Anime Section
+
+Homepage:
+Hero banner with trending anime (large backdrop + play button)
+Horizontal carousels: Trending (TMDB), Popular, Top Airing, Seasonal, Recommended
+Continue Watching row (localStorage-based with poster + progress bar)
+
+Global search bar (debounced, powered by TMDB + anime-specific results)
+Anime Detail Page:
+Rich header with backdrop, poster, title, metadata from TMDB
+Synopsis, score, genres, studios, voice actors, trailer embed
+Episode list with thumbnails and numbers (fetch from Consumet + TMDB seasons)
+
+Vidking Player Integration (core requirement):
+Full-featured Vidking player as the default video player
+Support direct m3u8/HLS URLs from Consumet
+Support iframe embeds from 2embed.cc
+Features: Multiple quality selector, subtitles, theater mode, fullscreen, PiP, autoplay next episode, skip intro/outro buttons, resume from last position (localStorage)
+Custom controls matching anime site aesthetics
+Fallback between 2embed iframe and direct HLS in Vidking
+
+
+Manga Section
+
+Browse pages with carousels (Popular, Latest Updates, Genres) using MangaDex
+Manga detail page: Synopsis, metadata, full chapter list with upload dates
+Manga Reader (highly polished):
+Default: Vertical infinite scrolling with lazy-loaded high-quality images
+Toggle: Horizontal paging mode (left/right arrows or swipe)
+Controls: Zoom in/out, fullscreen, brightness/contrast sliders, double-page view toggle, progress bar, chapter navigation
+Save reading progress per chapter in localStorage
+Keyboard support (arrow keys, space, etc.)
+
+
+Shared Features
+
+Smooth navigation with sidebar (desktop) + bottom nav (mobile)
+Skeleton loaders and error states everywhere
+Keyboard shortcuts for player (Space = play/pause, arrows for seek, F = fullscreen, etc.)
+Toast notifications for actions (e.g., "Added to Continue Watching")
+SEO-friendly: Dynamic metadata, Open Graph images via TMDB
+Footer with legal disclaimer: "Fan project for personal/educational use only. Please support official anime and manga releases."
+
+Architecture & Code Quality
+
+Clean folder structure: app/, components/ui/, components/anime/, components/manga/, lib/, hooks/, types/
+Server Components where possible, client components only when needed
+Proper API proxy routes for Consumet and any external calls
+Environment variables setup (.env.example) with TMDB keys and Consumet base URL
+Well-commented, maintainable, performant code
+Include a comprehensive README.md with setup instructions, how to run your own Consumet instance, provider notes, and legal warning
+
+Development Flow for Lovable
+
+Initialize the full Next.js project with the exact tech stack and theme.
+Create core layout (navbar, footer, providers, TMDB helper).
+Build homepage with carousels and search.
+Implement anime detail page + Vidking Player with 2embed + Consumet integration.
+Build manga detail + advanced vertical/horizontal reader.
+Add localStorage features and final polish.
+
+Start building now. First, output the complete project structure and the TMDB helper + layout components. Then proceed step-by-step.

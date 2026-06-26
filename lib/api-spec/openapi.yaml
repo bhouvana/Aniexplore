@@ -3,20 +3,24 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: EmberRealm - Anime & Manga streaming platform API proxy
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: anime
+    description: Anime operations via TMDB + Consumet
+  - name: manga
+    description: Manga operations via MangaDex
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +28,364 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /anime/trending:
+    get:
+      operationId: getTrendingAnime
+      tags: [anime]
+      summary: Get trending anime from TMDB
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: Trending anime list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnimeListResponse"
+
+  /anime/popular:
+    get:
+      operationId: getPopularAnime
+      tags: [anime]
+      summary: Get popular anime from TMDB
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: Popular anime list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnimeListResponse"
+
+  /anime/top-rated:
+    get:
+      operationId: getTopRatedAnime
+      tags: [anime]
+      summary: Get top rated anime from TMDB
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: Top rated anime list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnimeListResponse"
+
+  /anime/seasonal:
+    get:
+      operationId: getSeasonalAnime
+      tags: [anime]
+      summary: Get currently airing anime from TMDB
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: Seasonal anime list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnimeListResponse"
+
+  /anime/search:
+    get:
+      operationId: searchAnime
+      tags: [anime]
+      summary: Search anime by query
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnimeListResponse"
+
+  /anime/{id}:
+    get:
+      operationId: getAnimeDetails
+      tags: [anime]
+      summary: Get detailed anime info from TMDB
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Anime details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnimeDetails"
+
+  /anime/{id}/recommendations:
+    get:
+      operationId: getAnimeRecommendations
+      tags: [anime]
+      summary: Get anime recommendations from TMDB
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Recommendations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnimeListResponse"
+
+  /anime/{id}/videos:
+    get:
+      operationId: getAnimeVideos
+      tags: [anime]
+      summary: Get trailers and videos from TMDB
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Videos list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoListResponse"
+
+  /anime/{id}/seasons/{seasonNumber}/episodes:
+    get:
+      operationId: getAnimeEpisodes
+      tags: [anime]
+      summary: Get episode list for a season from TMDB
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: seasonNumber
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Episode list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EpisodeListResponse"
+
+  /anime/{id}/embed/{season}/{episode}:
+    get:
+      operationId: getAnimeEmbedUrl
+      tags: [anime]
+      summary: Get embed URL for anime episode playback
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: season
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: episode
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Embed URL info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmbedInfo"
+
+  /anime/genres:
+    get:
+      operationId: getAnimeGenres
+      tags: [anime]
+      summary: Get list of anime genres
+      responses:
+        "200":
+          description: Genre list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenreListResponse"
+
+  /manga/search:
+    get:
+      operationId: searchManga
+      tags: [manga]
+      summary: Search manga by title via MangaDex
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Manga search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MangaListResponse"
+
+  /manga/popular:
+    get:
+      operationId: getPopularManga
+      tags: [manga]
+      summary: Get popular manga from MangaDex
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Popular manga list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MangaListResponse"
+
+  /manga/latest:
+    get:
+      operationId: getLatestManga
+      tags: [manga]
+      summary: Get latest updated manga from MangaDex
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Latest manga list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MangaListResponse"
+
+  /manga/{id}:
+    get:
+      operationId: getMangaDetails
+      tags: [manga]
+      summary: Get manga details from MangaDex
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Manga details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MangaDetails"
+
+  /manga/{id}/chapters:
+    get:
+      operationId: getMangaChapters
+      tags: [manga]
+      summary: Get chapter list for a manga from MangaDex (English, first 500 chapters)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Chapter list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChapterListResponse"
+
+  /manga/chapter/{chapterId}/pages:
+    get:
+      operationId: getMangaChapterPages
+      tags: [manga]
+      summary: Get page image URLs for a chapter
+      parameters:
+        - in: path
+          name: chapterId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Chapter pages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChapterPagesResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +396,424 @@ components:
       required:
         - status
 
+    AnimeItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        name:
+          type: ["string", "null"]
+        posterPath:
+          type: ["string", "null"]
+        backdropPath:
+          type: ["string", "null"]
+        overview:
+          type: ["string", "null"]
+        voteAverage:
+          type: ["number", "null"]
+        voteCount:
+          type: ["integer", "null"]
+        firstAirDate:
+          type: ["string", "null"]
+        releaseDate:
+          type: ["string", "null"]
+        mediaType:
+          type: ["string", "null"]
+        genreIds:
+          type: array
+          items:
+            type: integer
+      required:
+        - id
+        - title
+
+    AnimeListResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnimeItem"
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        totalResults:
+          type: integer
+      required:
+        - results
+        - page
+        - totalPages
+        - totalResults
+
+    Genre:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required:
+        - id
+        - name
+
+    Season:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        seasonNumber:
+          type: integer
+        episodeCount:
+          type: ["integer", "null"]
+        airDate:
+          type: ["string", "null"]
+        overview:
+          type: ["string", "null"]
+        posterPath:
+          type: ["string", "null"]
+      required:
+        - id
+        - name
+        - seasonNumber
+
+    CastMember:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        character:
+          type: ["string", "null"]
+        profilePath:
+          type: ["string", "null"]
+      required:
+        - id
+        - name
+
+    AnimeDetails:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        originalName:
+          type: ["string", "null"]
+        posterPath:
+          type: ["string", "null"]
+        backdropPath:
+          type: ["string", "null"]
+        overview:
+          type: ["string", "null"]
+        voteAverage:
+          type: ["number", "null"]
+        voteCount:
+          type: ["integer", "null"]
+        firstAirDate:
+          type: ["string", "null"]
+        lastAirDate:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        numberOfSeasons:
+          type: ["integer", "null"]
+        numberOfEpisodes:
+          type: ["integer", "null"]
+        genres:
+          type: array
+          items:
+            $ref: "#/components/schemas/Genre"
+        seasons:
+          type: array
+          items:
+            $ref: "#/components/schemas/Season"
+        cast:
+          type: array
+          items:
+            $ref: "#/components/schemas/CastMember"
+        networks:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+            required:
+              - id
+              - name
+        recommendations:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnimeItem"
+      required:
+        - id
+        - name
+
+    VideoItem:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        key:
+          type: string
+        site:
+          type: string
+        type:
+          type: string
+        official:
+          type: boolean
+      required:
+        - id
+        - name
+        - key
+        - site
+        - type
+        - official
+
+    VideoListResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/VideoItem"
+      required:
+        - results
+
+    Episode:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        episodeNumber:
+          type: integer
+        seasonNumber:
+          type: integer
+        overview:
+          type: ["string", "null"]
+        airDate:
+          type: ["string", "null"]
+        stillPath:
+          type: ["string", "null"]
+        voteAverage:
+          type: ["number", "null"]
+        runtime:
+          type: ["integer", "null"]
+      required:
+        - id
+        - name
+        - episodeNumber
+        - seasonNumber
+
+    EpisodeListResponse:
+      type: object
+      properties:
+        episodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Episode"
+        seasonNumber:
+          type: integer
+        name:
+          type: string
+      required:
+        - episodes
+        - seasonNumber
+        - name
+
+    EmbedInfo:
+      type: object
+      properties:
+        embedUrl:
+          type: string
+        type:
+          type: string
+        tmdbId:
+          type: integer
+        episode:
+          type: integer
+        season:
+          type: integer
+      required:
+        - embedUrl
+        - type
+        - tmdbId
+        - episode
+        - season
+
+    GenreListResponse:
+      type: object
+      properties:
+        genres:
+          type: array
+          items:
+            $ref: "#/components/schemas/Genre"
+      required:
+        - genres
+
+    MangaItem:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        coverUrl:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        year:
+          type: ["integer", "null"]
+        tags:
+          type: array
+          items:
+            type: string
+        rating:
+          type: ["number", "null"]
+        lastChapter:
+          type: ["string", "null"]
+        lastUpdated:
+          type: ["string", "null"]
+      required:
+        - id
+        - title
+
+    MangaListResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/MangaItem"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required:
+        - results
+        - total
+        - limit
+        - offset
+
+    MangaDetails:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        altTitles:
+          type: array
+          items:
+            type: string
+        description:
+          type: ["string", "null"]
+        coverUrl:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        year:
+          type: ["integer", "null"]
+        tags:
+          type: array
+          items:
+            type: string
+        authors:
+          type: array
+          items:
+            type: string
+        artists:
+          type: array
+          items:
+            type: string
+        rating:
+          type: ["number", "null"]
+        totalChapters:
+          type: ["integer", "null"]
+        lastUpdated:
+          type: ["string", "null"]
+      required:
+        - id
+        - title
+
+    ChapterItem:
+      type: object
+      properties:
+        id:
+          type: string
+        chapter:
+          type: ["string", "null"]
+        title:
+          type: ["string", "null"]
+        volume:
+          type: ["string", "null"]
+        publishAt:
+          type: ["string", "null"]
+        readableAt:
+          type: ["string", "null"]
+        pages:
+          type: ["integer", "null"]
+        translatedLanguage:
+          type: string
+        scanlationGroup:
+          type: ["string", "null"]
+      required:
+        - id
+        - translatedLanguage
+
+    ChapterListResponse:
+      type: object
+      properties:
+        chapters:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChapterItem"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required:
+        - chapters
+        - total
+        - limit
+        - offset
+
+    ChapterPagesResponse:
+      type: object
+      properties:
+        chapterId:
+          type: string
+        baseUrl:
+          type: string
+        hash:
+          type: string
+        pages:
+          type: array
+          items:
+            type: string
+        dataSaver:
+          type: boolean
+      required:
+        - chapterId
+        - baseUrl
+        - hash
+        - pages
+        - dataSaver
