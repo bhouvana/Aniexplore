@@ -67,7 +67,7 @@ export default function MangaReader() {
   const pageUrls = pages.data
     ? pages.data.pages.map(
         (filename) =>
-          `${pages.data.baseUrl}/data/${pages.data.hash}/${filename}`
+          `${pages.data.baseUrl}/${pages.data.dataSaver ? "data-saver" : "data"}/${pages.data.hash}/${filename}`
       )
     : [];
 

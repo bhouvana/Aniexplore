@@ -170,6 +170,17 @@ export default function MangaDetail() {
             </h2>
           </div>
 
+          {!chapters.isLoading && chapters.data?.chapters.length === 0 && (
+            <div className="py-8 px-4 rounded-xl bg-card border border-border text-center">
+              <p className="text-muted-foreground text-sm">
+                No readable chapters found for this title.
+              </p>
+              <p className="text-muted-foreground/60 text-xs mt-1">
+                This manga may only be available on official platforms (e.g. Manga Plus, Viz).
+              </p>
+            </div>
+          )}
+
           <div className="space-y-1.5 max-h-[60vh] overflow-y-auto pr-1">
             {chapters.isLoading
               ? Array.from({ length: 10 }).map((_, i) => (

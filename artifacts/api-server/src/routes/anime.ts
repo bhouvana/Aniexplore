@@ -1,21 +1,27 @@
 import { Router } from "express";
-import { logger } from "../lib/logger";
 
 const router = Router();
 
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const TMDB_API_KEY = process.env.TMDB_API_KEY ?? "";
 
-async function tmdbFetch<T>(path: string, params: Record<string, string | number> = {}): Promise<T> {
+// Genre 16 = Animation, Japanese-original language — tight anime filter
+const ANIME_PARAMS = {
+  with_genres: "16",
+  with_original_language: "ja",
+};
+
+async function tmdbFetch<T>(
+  path: string,
+  params: Record<string, string | number> = {}
+): Promise<T> {
   const url = new URL(`${TMDB_BASE}${path}`);
   url.searchParams.set("api_key", TMDB_API_KEY);
   for (const [k, v] of Object.entries(params)) {
     url.searchParams.set(k, String(v));
   }
   const res = await fetch(url.toString());
-  if (!res.ok) {
-    throw new Error(`TMDB error ${res.status}: ${res.statusText}`);
-  }
+  if (!res.ok) throw new Error(`TMDB ${res.status}: ${res.statusText}`);
   return res.json() as Promise<T>;
 }
 
@@ -50,22 +56,21 @@ function mapListResponse(data: {
   };
 }
 
-const ANIME_KEYWORD_IDS = "210024";
-
 // GET /anime/genres
 router.get("/genres", async (req, res) => {
   try {
-    const data = await tmdbFetch<{ genres: { id: number; name: string }[] }>("/genre/tv/list", {
-      language: "en-US",
-    });
+    const data = await tmdbFetch<{ genres: { id: number; name: string }[] }>(
+      "/genre/tv/list",
+      { language: "en-US" }
+    );
     res.json({ genres: data.genres });
   } catch (err) {
-    req.log.error({ err }, "Failed to fetch anime genres");
+    req.log.error({ err }, "Failed to fetch genres");
     res.status(502).json({ error: "Failed to fetch genres" });
   }
 });
 
-// GET /anime/trending
+// GET /anime/trending — uses discover sorted by popularity (trending supports no genre filter)
 router.get("/trending", async (req, res) => {
   const page = Number(req.query["page"] ?? 1);
   try {
@@ -74,11 +79,15 @@ router.get("/trending", async (req, res) => {
       page: number;
       total_pages: number;
       total_results: number;
-    }>("/trending/tv/week", { page, with_keywords: ANIME_KEYWORD_IDS });
+    }>("/discover/tv", {
+      page,
+      ...ANIME_PARAMS,
+      sort_by: "popularity.desc",
+    });
     res.json(mapListResponse(data));
   } catch (err) {
-    req.log.error({ err }, "Failed to fetch trending anime");
-    res.status(502).json({ error: "Failed to fetch trending anime" });
+    req.log.error({ err }, "Failed to fetch trending");
+    res.status(502).json({ error: "Failed to fetch trending" });
   }
 });
 
@@ -93,14 +102,14 @@ router.get("/popular", async (req, res) => {
       total_results: number;
     }>("/discover/tv", {
       page,
-      with_keywords: ANIME_KEYWORD_IDS,
+      ...ANIME_PARAMS,
       sort_by: "popularity.desc",
-      with_original_language: "ja",
+      "vote_count.gte": 50,
     });
     res.json(mapListResponse(data));
   } catch (err) {
-    req.log.error({ err }, "Failed to fetch popular anime");
-    res.status(502).json({ error: "Failed to fetch popular anime" });
+    req.log.error({ err }, "Failed to fetch popular");
+    res.status(502).json({ error: "Failed to fetch popular" });
   }
 });
 
@@ -115,21 +124,25 @@ router.get("/top-rated", async (req, res) => {
       total_results: number;
     }>("/discover/tv", {
       page,
-      with_keywords: ANIME_KEYWORD_IDS,
+      ...ANIME_PARAMS,
       sort_by: "vote_average.desc",
-      with_original_language: "ja",
-      "vote_count.gte": 100,
+      "vote_count.gte": 200,
     });
     res.json(mapListResponse(data));
   } catch (err) {
-    req.log.error({ err }, "Failed to fetch top-rated anime");
-    res.status(502).json({ error: "Failed to fetch top-rated anime" });
+    req.log.error({ err }, "Failed to fetch top-rated");
+    res.status(502).json({ error: "Failed to fetch top-rated" });
   }
 });
 
-// GET /anime/seasonal
+// GET /anime/seasonal — currently airing Japanese animation
 router.get("/seasonal", async (req, res) => {
   const page = Number(req.query["page"] ?? 1);
+  const now = new Date();
+  const monthAgo = new Date(now);
+  monthAgo.setMonth(monthAgo.getMonth() - 4);
+  const airDateGte = monthAgo.toISOString().split("T")[0];
+
   try {
     const data = await tmdbFetch<{
       results: Record<string, unknown>[];
@@ -138,15 +151,14 @@ router.get("/seasonal", async (req, res) => {
       total_results: number;
     }>("/discover/tv", {
       page,
-      with_keywords: ANIME_KEYWORD_IDS,
+      ...ANIME_PARAMS,
       sort_by: "popularity.desc",
-      with_original_language: "ja",
-      with_status: "0",
+      "first_air_date.gte": airDateGte,
     });
     res.json(mapListResponse(data));
   } catch (err) {
-    req.log.error({ err }, "Failed to fetch seasonal anime");
-    res.status(502).json({ error: "Failed to fetch seasonal anime" });
+    req.log.error({ err }, "Failed to fetch seasonal");
+    res.status(502).json({ error: "Failed to fetch seasonal" });
   }
 });
 
@@ -165,20 +177,26 @@ router.get("/search", async (req, res) => {
       total_pages: number;
       total_results: number;
     }>("/search/tv", { query: q, page });
-    res.json(mapListResponse(data));
+    // Filter to animation or Japanese originals when possible
+    const filtered = data.results.filter((r) => {
+      const genres = (r["genre_ids"] as number[]) ?? [];
+      const lang = r["original_language"] as string;
+      return genres.includes(16) || lang === "ja";
+    });
+    res.json({
+      ...mapListResponse(data),
+      results: filtered.map(mapTVItem),
+    });
   } catch (err) {
-    req.log.error({ err }, "Failed to search anime");
-    res.status(502).json({ error: "Failed to search anime" });
+    req.log.error({ err }, "Failed to search");
+    res.status(502).json({ error: "Failed to search" });
   }
 });
 
-// GET /anime/:id/recommendations — must come before /:id
+// Sub-routes BEFORE /:id
 router.get("/:id/recommendations", async (req, res) => {
   const id = Number(req.params["id"]);
-  if (isNaN(id)) {
-    res.status(400).json({ error: "Invalid id" });
-    return;
-  }
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
   try {
     const data = await tmdbFetch<{
       results: Record<string, unknown>[];
@@ -193,23 +211,12 @@ router.get("/:id/recommendations", async (req, res) => {
   }
 });
 
-// GET /anime/:id/videos
 router.get("/:id/videos", async (req, res) => {
   const id = Number(req.params["id"]);
-  if (isNaN(id)) {
-    res.status(400).json({ error: "Invalid id" });
-    return;
-  }
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
   try {
     const data = await tmdbFetch<{
-      results: {
-        id: string;
-        name: string;
-        key: string;
-        site: string;
-        type: string;
-        official: boolean;
-      }[];
+      results: { id: string; name: string; key: string; site: string; type: string; official: boolean }[];
     }>(`/tv/${id}/videos`, { language: "en-US" });
     res.json({ results: data.results });
   } catch (err) {
@@ -218,13 +225,11 @@ router.get("/:id/videos", async (req, res) => {
   }
 });
 
-// GET /anime/:id/seasons/:seasonNumber/episodes
 router.get("/:id/seasons/:seasonNumber/episodes", async (req, res) => {
   const id = Number(req.params["id"]);
   const seasonNumber = Number(req.params["seasonNumber"]);
   if (isNaN(id) || isNaN(seasonNumber)) {
-    res.status(400).json({ error: "Invalid params" });
-    return;
+    res.status(400).json({ error: "Invalid params" }); return;
   }
   try {
     const data = await tmdbFetch<{
@@ -253,40 +258,29 @@ router.get("/:id/seasons/:seasonNumber/episodes", async (req, res) => {
   }
 });
 
-// GET /anime/:id/embed/:season/:episode
 router.get("/:id/embed/:season/:episode", async (req, res) => {
   const id = Number(req.params["id"]);
   const season = Number(req.params["season"]);
   const episode = Number(req.params["episode"]);
   if (isNaN(id) || isNaN(season) || isNaN(episode)) {
-    res.status(400).json({ error: "Invalid params" });
-    return;
+    res.status(400).json({ error: "Invalid params" }); return;
   }
   const embedUrl = `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`;
   res.json({ embedUrl, type: "iframe", tmdbId: id, season, episode });
 });
 
-// GET /anime/:id — must come AFTER named sub-routes
+// GET /anime/:id — LAST
 router.get("/:id", async (req, res) => {
   const id = Number(req.params["id"]);
-  if (isNaN(id)) {
-    res.status(400).json({ error: "Invalid id" });
-    return;
-  }
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
   try {
     const [details, credits] = await Promise.all([
-      tmdbFetch<Record<string, unknown>>(`/tv/${id}`, {
-        append_to_response: "recommendations",
-      }),
+      tmdbFetch<Record<string, unknown>>(`/tv/${id}`, { append_to_response: "recommendations" }),
       tmdbFetch<{ cast: Record<string, unknown>[] }>(`/tv/${id}/credits`),
     ]);
-
-    const rawGenres = (details["genres"] as { id: number; name: string }[]) ?? [];
-    const rawSeasons = (details["seasons"] as Record<string, unknown>[]) ?? [];
     const rawRecommendations = (
       (details["recommendations"] as { results: Record<string, unknown>[] }) ?? { results: [] }
     ).results;
-    const rawNetworks = (details["networks"] as { id: number; name: string }[]) ?? [];
 
     res.json({
       id: details["id"],
@@ -302,8 +296,8 @@ router.get("/:id", async (req, res) => {
       status: details["status"],
       numberOfSeasons: details["number_of_seasons"],
       numberOfEpisodes: details["number_of_episodes"],
-      genres: rawGenres,
-      seasons: rawSeasons.map((s) => ({
+      genres: (details["genres"] as { id: number; name: string }[]) ?? [],
+      seasons: ((details["seasons"] as Record<string, unknown>[]) ?? []).map((s) => ({
         id: s["id"],
         name: s["name"],
         seasonNumber: s["season_number"],
@@ -312,13 +306,16 @@ router.get("/:id", async (req, res) => {
         overview: s["overview"],
         posterPath: s["poster_path"],
       })),
-      cast: (credits.cast ?? []).slice(0, 20).map((c) => ({
+      cast: ((credits.cast ?? []) as Record<string, unknown>[]).slice(0, 20).map((c) => ({
         id: c["id"],
         name: c["name"],
         character: c["character"],
         profilePath: c["profile_path"],
       })),
-      networks: rawNetworks.map((n) => ({ id: n.id, name: n.name })),
+      networks: ((details["networks"] as { id: number; name: string }[]) ?? []).map((n) => ({
+        id: n.id,
+        name: n.name,
+      })),
       recommendations: rawRecommendations.slice(0, 12).map(mapTVItem),
     });
   } catch (err) {

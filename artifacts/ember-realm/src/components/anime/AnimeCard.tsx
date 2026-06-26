@@ -52,7 +52,7 @@ export default function AnimeCard({ id, title, posterPath, voteAverage, firstAir
             </div>
           )}
 
-          <div className="absolute inset-0 rounded-xl ring-0 group-hover:ring-1 ring-primary/50 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.3)] transition-all duration-300" />
+          <div className="absolute inset-0 rounded-xl ring-0 group-hover:ring-1 ring-primary/40 transition-all duration-300" />
         </div>
 
         <div className="mt-2 px-0.5">

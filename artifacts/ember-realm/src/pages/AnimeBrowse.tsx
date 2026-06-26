@@ -118,7 +118,7 @@ export default function AnimeBrowse() {
                 className={cn(
                   "flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200",
                   activeFilter === key
-                    ? "bg-primary/20 border-primary/50 text-primary shadow-[0_0_10px_rgba(168,85,247,0.2)]"
+                    ? "bg-primary/15 border-primary/40 text-primary"
                     : "border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
                 )}
               >

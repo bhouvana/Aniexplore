@@ -84,7 +84,7 @@ export default function HeroSection({ items, isLoading }: HeroSectionProps) {
             <Link href={`/watch/${hero.id}/1/1`}>
               <Button
                 data-testid="hero-play-button"
-                className="bg-primary hover:bg-primary/90 text-white font-bold px-6 py-2.5 rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:shadow-[0_0_30px_rgba(168,85,247,0.7)] transition-all"
+                className="bg-primary hover:bg-primary/90 text-white font-bold px-6 py-2.5 rounded-xl shadow-[0_0_24px_rgba(249,115,22,0.45)] hover:shadow-[0_0_32px_rgba(249,115,22,0.6)] transition-all"
               >
                 <Play size={18} className="mr-2 fill-white" />
                 Play Now

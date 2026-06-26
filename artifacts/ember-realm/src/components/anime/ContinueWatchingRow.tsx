@@ -35,7 +35,7 @@ export default function ContinueWatchingRow() {
                   <div className="w-full h-full bg-card" />
                 )}
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <div className="w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.6)]">
+                  <div className="w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.5)]">
                     <Play size={18} className="fill-white text-white ml-0.5" />
                   </div>
                 </div>

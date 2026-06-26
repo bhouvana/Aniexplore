@@ -164,7 +164,7 @@ export default function AnimeDetail() {
               <Link href={`/watch/${id}/1/1`}>
                 <Button
                   data-testid="detail-play-button"
-                  className="bg-primary hover:bg-primary/90 text-white font-bold shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+                  className="bg-primary hover:bg-primary/90 text-white font-bold shadow-[0_0_18px_rgba(249,115,22,0.4)]"
                 >
                   <Play size={16} className="mr-2 fill-white" />
                   Watch Now

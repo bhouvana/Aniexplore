@@ -32,7 +32,7 @@ export default function Sidebar() {
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer group",
                   isActive
-                    ? "bg-primary/20 text-primary border border-primary/30 shadow-[0_0_20px_rgba(168,85,247,0.15)]"
+                    ? "bg-primary/15 text-primary border border-primary/25"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"
                 )}
               >
@@ -45,7 +45,7 @@ export default function Sidebar() {
                 />
                 <span className="font-medium">{label}</span>
                 {isActive && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
                 )}
               </div>
             </Link>
