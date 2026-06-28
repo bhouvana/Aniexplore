@@ -7,7 +7,7 @@ services:
 
     # Render sets $PORT automatically; NODE_VERSION selects the runtime
     buildCommand: >-
-      npm install -g pnpm &&
+      npm install -g pnpm@9 &&
       pnpm install --no-frozen-lockfile &&
       pnpm --filter @workspace/ember-realm build &&
       pnpm --filter @workspace/api-server build
