@@ -1,140 +1,189 @@
-# Aniexplore
+<img width="1400" src="https://capsule-render.vercel.app/api?type=waving&color=c9a01f&height=200&section=header&text=Aniexplore&fontSize=80&fontColor=ffffff&fontAlignY=38&desc=Anime%20%26%20Manga%20without%20limits&descAlignY=58&descSize=22" />
 
-A full-stack anime streaming and manga reading platform. Browse trending anime, switch between multiple video embed providers, and read manga chapters — all in one place.
+<div align="center">
 
-Built as a monorepo with a React frontend, an Express API server, and a shared OpenAPI-driven type system.
+[![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![Vite](https://img.shields.io/badge/Vite_7-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev)
+[![Express](https://img.shields.io/badge/Express_5-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com)
+[![TMDB](https://img.shields.io/badge/TMDB-01B4E4?style=for-the-badge&logo=themoviedatabase&logoColor=white)](https://themoviedb.org)
+[![MangaDex](https://img.shields.io/badge/MangaDex-FF6740?style=for-the-badge)](https://mangadex.org)
+[![AniList](https://img.shields.io/badge/AniList-02A9FF?style=for-the-badge)](https://anilist.co)
+
+**A full-stack anime streaming and manga reading platform built with a modern monorepo.**  
+Browse trending anime, watch with multiple embed providers, and read manga — all in one dark gold experience.
+
+</div>
+
+---
+
+## What is Aniexplore?
+
+Aniexplore is a cinematic discovery and reading platform for anime and manga. It aggregates content from TMDB, MangaDex, and AniList to give you a unified place to find what to watch or read next. Built as a production-quality monorepo with a shared OpenAPI type system, an Express proxy backend, and a React SPA frontend.
 
 ---
 
 ## Features
 
-- **Anime browsing** — Trending, popular, top-rated, and seasonal anime powered by TMDB
-- **Video playback** — 8 embed providers (vidsrc, vidlink, embed.su, 2embed, multiembed, etc.) with a one-click switcher if any provider is down
-- **Manga browsing** — Popular and latest titles from MangaDex + AniList combined
-- **Manga reader** — Full-page vertical reader with keyboard navigation (← →), chapter jump list
-- **Search** — Anime and manga search with 400ms debounce
-- **Continue watching** — In-browser watch progress saved to localStorage
-- **Dark gold & black theme** — CSS variable-based design system with glass morphism cards
+| Category | Feature |
+|---|---|
+| **Anime** | Trending, popular, top-rated, and seasonal anime powered by TMDB |
+| **Browse** | Filtered browse pages for both anime and manga with real-time search |
+| **Watch** | 8 embedded video providers with a one-click switcher if any goes down |
+| **Manga** | Popular and latest titles merged from MangaDex + AniList |
+| **Reader** | Full-page vertical manga reader with keyboard chapter navigation (← →) |
+| **Details** | Full anime pages — cast, seasons, episode list, YouTube trailer modal |
+| **Continue Watching** | In-browser watch progress saved to localStorage |
+| **UX** | Dark gold theme, glass morphism cards, skeleton loaders, Radix UI |
 
 ---
 
 ## Tech Stack
 
-| Layer | Technology |
+### Frontend (`artifacts/ember-realm`)
+
+| Tool | Purpose |
 |---|---|
-| Frontend | React 19, TypeScript, Vite 7, Tailwind CSS 4, Radix UI |
-| Routing | Wouter (lightweight, Expo-compatible) |
-| Server state | TanStack React Query (auto-generated hooks via Orval) |
-| Backend | Node.js 22, Express 5, TypeScript |
-| Logging | Pino with structured JSON |
-| Cache | In-memory TTL cache (no Redis needed) |
-| Data sources | TMDB, MangaDex, AniList GraphQL |
-| Code gen | Orval (OpenAPI → React Query hooks + Zod validators) |
-| Package manager | pnpm workspaces |
-| Deployment | Render (single web service) |
+| [React 19](https://react.dev) | UI library |
+| [TypeScript](https://typescriptlang.org) | End-to-end type safety |
+| [Vite 7](https://vite.dev) | Dev server and bundler |
+| [Tailwind CSS 4](https://tailwindcss.com) | Utility-first styling with CSS custom properties |
+| [Radix UI](https://radix-ui.com) | Accessible headless UI primitives |
+| [TanStack React Query](https://tanstack.com/query) | Server state, caching, auto-generated hooks |
+| [Wouter](https://github.com/molefrog/wouter) | Lightweight client-side router |
+| [Framer Motion](https://framer.com/motion) | Animations and transitions |
+
+### Backend (`artifacts/api-server`)
+
+| Tool | Purpose |
+|---|---|
+| [Node.js 22](https://nodejs.org) | JavaScript runtime |
+| [Express 5](https://expressjs.com) | HTTP server and API routing |
+| [TypeScript](https://typescriptlang.org) | Type-safe backend |
+| [Pino](https://getpino.io) | Structured JSON logging |
+| [TMDB API](https://themoviedb.org) | Anime metadata (trending, details, episodes) |
+| [MangaDex API](https://mangadex.org) | Manga chapters and page images |
+| [AniList GraphQL](https://anilist.co) | Manga metadata and discovery |
+
+### Shared Libraries (`lib/`)
+
+| Package | Contents |
+|---|---|
+| `lib/api-spec` | OpenAPI specification — single source of truth for the API contract |
+| `lib/api-client-react` | Generated React Query hooks (do not edit — run `pnpm generate`) |
+| `lib/api-zod` | Generated Zod validators and inferred TypeScript types |
+| `lib/db` | Drizzle ORM + PostgreSQL schema (scaffolded for future persistence) |
+
+Managed by [pnpm workspaces](https://pnpm.io/workspaces) with [Orval](https://orval.dev) for code generation.
 
 ---
 
-## Repository Structure
+## Architecture
 
 ```
-.
+┌───────────────────────────────────────────────────┐
+│                    Browser                         │
+│   React 19 SPA  ·  Wouter  ·  TanStack Query       │
+│   Radix UI  ·  Tailwind CSS  ·  Framer Motion      │
+└──────────────────────┬────────────────────────────┘
+                       │  REST  /api/*
+┌──────────────────────▼────────────────────────────┐
+│            Express API  (port 5001)                │
+│   /api/anime/*   /api/manga/*   /api/healthz       │
+│   In-memory TTL cache  ·  Rate limit 300/15min     │
+│   Trust proxy  ·  Security headers  ·  Pino logs   │
+└──────────┬─────────────────────┬──────────────────┘
+           │                     │
+┌──────────▼──────────┐  ┌──────▼────────────────────┐
+│  TMDB REST API       │  │  MangaDex REST API         │
+│  Anime metadata      │  │  Chapters + page images    │
+│  Episodes, cast      │  └──────┬────────────────────┘
+│  Trailers            │         │
+└─────────────────────┘  ┌──────▼────────────────────┐
+                          │  AniList GraphQL           │
+                          │  Manga metadata + staff    │
+                          └───────────────────────────┘
+```
+
+**Code generation flow:**
+
+```
+lib/api-spec/openapi.yaml
+       │
+       ▼  Orval
+lib/api-client-react/  →  useGetAnimeDetails(), useGetMangaChapters(), …
+lib/api-zod/           →  Zod schemas + TypeScript types
+```
+
+---
+
+## Project Structure
+
+```
+aniexplore/
 ├── artifacts/
-│   ├── api-server/          # Express backend
-│   │   ├── src/
-│   │   │   ├── app.ts       # Express app, middleware chain
-│   │   │   ├── index.ts     # Server entry, graceful SIGTERM shutdown
-│   │   │   ├── lib/
-│   │   │   │   ├── cache.ts # In-memory TTL cache with sweep
-│   │   │   │   └── logger.ts
-│   │   │   ├── middleware/
-│   │   │   │   ├── rate-limit.ts     # 300 req / 15 min per IP
-│   │   │   │   ├── security-headers.ts
-│   │   │   │   └── error-handler.ts
-│   │   │   └── routes/
-│   │   │       ├── anime.ts  # TMDB anime routes
-│   │   │       └── manga.ts  # MangaDex + AniList manga routes
-│   │   └── build.mjs         # esbuild bundler config
+│   ├── api-server/              # Express backend
+│   │   └── src/
+│   │       ├── app.ts           # Express setup, middleware chain
+│   │       ├── index.ts         # Entry point, graceful SIGTERM shutdown
+│   │       ├── lib/
+│   │       │   ├── cache.ts     # In-memory TTL cache with periodic sweep
+│   │       │   └── logger.ts    # Pino logger
+│   │       ├── middleware/
+│   │       │   ├── rate-limit.ts
+│   │       │   ├── security-headers.ts
+│   │       │   └── error-handler.ts
+│   │       └── routes/
+│   │           ├── anime.ts     # TMDB anime routes
+│   │           └── manga.ts     # MangaDex + AniList manga routes
 │   │
-│   └── ember-realm/          # React SPA
+│   └── ember-realm/             # React SPA
 │       └── src/
-│           ├── pages/        # Route-level page components
-│           ├── components/   # UI primitives + feature components
+│           ├── pages/           # Route-level page components
+│           ├── components/
+│           │   ├── layout/      # TopNav, BottomNav, SearchModal
+│           │   ├── anime/       # HeroSection, AnimeCarousel, AnimeCard
+│           │   └── manga/       # MangaCarousel, MangaCard
 │           ├── lib/
-│           │   └── tmdb.ts   # TMDB image URL builders
-│           └── App.tsx       # Router + React Query provider
+│           │   └── tmdb.ts      # TMDB image URL builders
+│           └── App.tsx          # Router + React Query provider
 │
 ├── lib/
 │   ├── api-spec/
-│   │   └── openapi.yaml      # Single source of truth for the API contract
-│   ├── api-client-react/     # Generated React Query hooks (do not edit)
-│   ├── api-zod/              # Generated Zod validators (do not edit)
-│   └── db/                   # Drizzle ORM + PostgreSQL (scaffolded, future use)
+│   │   └── openapi.yaml         # API contract (source of truth)
+│   ├── api-client-react/        # Generated React Query hooks
+│   ├── api-zod/                 # Generated Zod validators
+│   └── db/                      # Drizzle ORM + PostgreSQL (future)
 │
-├── render.yaml               # Render deployment config
-└── pnpm-workspace.yaml       # Workspace + supply-chain security policy
+├── render.yaml                  # Render deployment config
+└── pnpm-workspace.yaml          # Workspace + supply-chain security
 ```
 
 ---
 
-## How It Works
-
-### Data flow
-
-```
-Browser (React SPA)
-  │  relative /api/* calls via React Query hooks
-  ▼
-Express API Server
-  ├── /api/anime/*  →  TMDB API (genre 16 = Animation, language = ja)
-  ├── /api/manga/*  →  MangaDex REST + AniList GraphQL (merged + deduped)
-  └── /api/manga/chapter/:id/pages  →  MangaDex at-home CDN
-```
-
-The API server never exposes TMDB credentials to the browser. All third-party requests are proxied with an in-memory cache.
-
-### Code generation
-
-`lib/api-spec/openapi.yaml` is the single contract. Orval reads it and generates:
-- `lib/api-client-react` — typed React Query hooks (`useGetAnimeDetails`, `useGetMangaChapters`, etc.)
-- `lib/api-zod` — Zod validators and inferred TypeScript types
-
-**Do not hand-edit generated files.** Edit the OpenAPI spec, then run:
-
-```bash
-pnpm run generate
-```
-
-### Manga dual-source architecture
-
-Popular/latest/search results are fetched from **MangaDex** and **AniList** in parallel (`Promise.allSettled`), then merged and deduplicated by normalised title. MangaDex results take priority.
-
-AniList manga are identified by an `al-{id}` prefix. When a user opens one, the backend:
-1. Fetches metadata from AniList GraphQL (cover, genres, author, synopsis)
-2. Resolves the title to a MangaDex manga ID via title search
-3. Fetches chapters from MangaDex using that UUID
-
-This gives you AniList's curated discovery with MangaDex's chapter availability.
-
----
-
-## Getting Started
+## Local Development
 
 ### Prerequisites
 
-- Node.js 22+
-- pnpm 9+
+- Node.js ≥ 22
+- pnpm ≥ 9
 - A [TMDB API key](https://www.themoviedb.org/settings/api) (free)
 
-### Install
+### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/aniexplore
-cd aniexplore
+git clone https://github.com/bhouvana/Aniexplore.git
+cd Aniexplore
+```
+
+### 2. Install dependencies
+
+```bash
 pnpm install
 ```
 
-### Environment variables
+### 3. Set up environment variables
 
 Create `.env` in the project root:
 
@@ -149,52 +198,27 @@ TMDB_READ_ACCESS_TOKEN=your_tmdb_bearer_token_here
 | `PORT` | Yes | Port the API server listens on |
 | `TMDB_API_KEY` | Yes | v3 API key from TMDB dashboard |
 | `TMDB_READ_ACCESS_TOKEN` | Yes | Bearer token from TMDB dashboard |
-| `DATABASE_URL` | No | PostgreSQL URL (future: watch history) |
-| `CORS_ORIGINS` | No | Comma-separated allowed origins (defaults to permissive in dev) |
+| `DATABASE_URL` | No | PostgreSQL URL (future: watch history persistence) |
+| `CORS_ORIGINS` | No | Comma-separated allowed origins |
 | `LOG_LEVEL` | No | Pino log level: `trace` / `debug` / `info` / `warn` / `error` |
 
-### Run in development
-
-Open two terminals:
+### 4. Start both apps
 
 ```bash
-# Terminal 1 — API server (hot reload)
+# Terminal 1 — API server (port 5001)
 pnpm --filter @workspace/api-server dev
 
-# Terminal 2 — Frontend (Vite dev server on :3000)
+# Terminal 2 — Frontend (port 3000)
 pnpm --filter @workspace/ember-realm dev
 ```
 
-The Vite config proxies `/api/*` requests to `http://localhost:5001`, so the frontend and backend work together without CORS configuration.
+Vite proxies all `/api/*` requests to `http://localhost:5001` in development, so no CORS setup is needed.
 
 Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## Building for Production
-
-```bash
-# Build everything
-pnpm run build
-
-# Or build individually
-pnpm --filter @workspace/api-server build
-pnpm --filter @workspace/ember-realm build
-```
-
-The API server builds to `artifacts/api-server/dist/index.mjs` (ESM, bundled with esbuild).
-
-The frontend builds to `artifacts/ember-realm/dist/public/`. In production the API server serves this directory as static files and handles SPA routing via a catch-all route.
-
-To run locally in production mode:
-
-```bash
-PORT=5001 TMDB_API_KEY=... node --enable-source-maps artifacts/api-server/dist/index.mjs
-```
-
----
-
-## API Reference
+## API Endpoints
 
 All routes are prefixed with `/api`.
 
@@ -202,34 +226,34 @@ All routes are prefixed with `/api`.
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/healthz` | Returns `{ status: "ok" }` |
+| `GET` | `/healthz` | Returns `{ status: "ok" }` |
 
 ### Anime
 
-| Method | Path | Query params | Description |
+| Method | Path | Params | Description |
 |---|---|---|---|
-| GET | `/anime/trending` | `page` | Trending anime (TMDB) |
-| GET | `/anime/popular` | `page` | Most popular anime |
-| GET | `/anime/top-rated` | `page` | Top-rated (200+ votes) |
-| GET | `/anime/seasonal` | `page` | Released in last 4 months |
-| GET | `/anime/search` | `q`, `page` | Search anime by title |
-| GET | `/anime/genres` | — | All TMDB genre list |
-| GET | `/anime/:id` | — | Full show details (cast, seasons, networks) |
-| GET | `/anime/:id/recommendations` | — | Similar shows |
-| GET | `/anime/:id/videos` | — | Trailers and teasers |
-| GET | `/anime/:id/seasons/:seasonNumber/episodes` | — | Episode list |
-| GET | `/anime/:id/embed/:season/:episode` | — | 8 video provider embed URLs |
+| `GET` | `/anime/trending` | `page` | Trending anime |
+| `GET` | `/anime/popular` | `page` | Most popular anime |
+| `GET` | `/anime/top-rated` | `page` | Top-rated (200+ votes) |
+| `GET` | `/anime/seasonal` | `page` | Released in last 4 months |
+| `GET` | `/anime/search` | `q`, `page` | Search by title |
+| `GET` | `/anime/genres` | — | All TMDB genre list |
+| `GET` | `/anime/:id` | — | Full details — cast, seasons, networks |
+| `GET` | `/anime/:id/recommendations` | — | Similar shows |
+| `GET` | `/anime/:id/videos` | — | Trailers and teasers |
+| `GET` | `/anime/:id/seasons/:n/episodes` | — | Episode list |
+| `GET` | `/anime/:id/embed/:season/:episode` | — | 8 video provider embed URLs |
 
 ### Manga
 
-| Method | Path | Query params | Description |
+| Method | Path | Params | Description |
 |---|---|---|---|
-| GET | `/manga/popular` | `limit`, `offset` | Popular titles (MangaDex + AniList) |
-| GET | `/manga/latest` | `limit`, `offset` | Latest updates + trending |
-| GET | `/manga/search` | `q`, `limit`, `offset` | Search by title |
-| GET | `/manga/:id` | — | Manga details. `:id` is a MangaDex UUID or `al-{anilistId}` |
-| GET | `/manga/:id/chapters` | `limit`, `offset` | Chapter list |
-| GET | `/manga/chapter/:chapterId/pages` | — | Page image URLs for a chapter |
+| `GET` | `/manga/popular` | `limit`, `offset` | Popular titles from MangaDex + AniList |
+| `GET` | `/manga/latest` | `limit`, `offset` | Latest updates + trending |
+| `GET` | `/manga/search` | `q`, `limit`, `offset` | Search by title |
+| `GET` | `/manga/:id` | — | Details. `:id` is a MangaDex UUID or `al-{anilistId}` |
+| `GET` | `/manga/:id/chapters` | `limit`, `offset` | Chapter list |
+| `GET` | `/manga/chapter/:chapterId/pages` | — | Page image URLs for a chapter |
 
 ---
 
@@ -238,39 +262,38 @@ All routes are prefixed with `/api`.
 | Route | Description |
 |---|---|
 | `/` | Home — hero banner, trending/popular/seasonal carousels, popular manga |
-| `/anime` | Anime browse with search |
-| `/anime/:id` | Anime detail — poster, overview, cast, seasons, trailer |
-| `/watch/:id/:season/:episode` | Watch page — embed player with provider switcher |
+| `/anime` | Anime browse with search and filters |
+| `/anime/:id` | Anime detail — poster, overview, cast, seasons, trailer modal |
+| `/watch/:id/:season/:episode` | Watch page — embed player with 8-provider switcher |
 | `/manga` | Manga browse with search |
-| `/manga/:id` | Manga detail — cover, synopsis, chapter list |
+| `/manga/:id` | Manga detail — cover, synopsis, full chapter list |
 | `/manga/read/:id/:chapterId` | Manga reader — vertical scroll, keyboard chapter navigation |
 
 ---
 
-## Development Notes
-
-### Regenerating API types
-
-After editing `lib/api-spec/openapi.yaml`:
+## Scripts
 
 ```bash
-pnpm run generate
+pnpm run build               # Build all packages for production
+pnpm run typecheck           # TypeScript check across the monorepo
+pnpm run generate            # Regenerate API hooks + Zod types from openapi.yaml
+
+pnpm --filter @workspace/api-server dev    # API server with hot reload
+pnpm --filter @workspace/ember-realm dev   # Frontend dev server
+pnpm --filter @workspace/api-server build  # Build API server
+pnpm --filter @workspace/ember-realm build # Build frontend
 ```
 
-This rewrites files under `lib/api-client-react/src/generated/` and `lib/api-zod/src/generated/`. Commit both the spec change and the generated output.
+---
 
-### Adding a new API route
+## License
 
-1. Add the endpoint to `lib/api-spec/openapi.yaml`
-2. Run `pnpm run generate`
-3. Implement the route handler in `artifacts/api-server/src/routes/`
-4. Register it in `artifacts/api-server/src/routes/index.ts`
-5. Use the generated hook in the frontend (`useGetYourNewEndpoint`)
+MIT © [Bhouvana](https://github.com/bhouvana)
 
-### Cache invalidation
+---
 
-The in-memory cache is per-process and clears on restart. To force-refresh a cached value in dev, restart the API server. TTLs are defined in `artifacts/api-server/src/lib/cache.ts`.
+<div align="center">
+  <sub>Built with React 19 · Powered by TMDB · Manga by MangaDex & AniList</sub>
+</div>
 
-### Supply-chain security
-
-`pnpm-workspace.yaml` enforces a minimum 1-day release age for all npm packages, protecting against newly-published malicious packages. This is managed automatically by pnpm's audit-ci integration.
+<img width="1400" src="https://capsule-render.vercel.app/api?type=waving&color=c9a01f&height=120&section=footer" />
