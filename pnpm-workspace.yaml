@@ -68,7 +68,7 @@ catalog:
 
 autoInstallPeers: false
 
-onlyBuiltDependencies:
+neverBuiltDependencies:
   - '@swc/core'
   - esbuild
   - msw
