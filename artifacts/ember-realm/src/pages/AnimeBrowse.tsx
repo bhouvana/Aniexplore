@@ -93,7 +93,7 @@ export default function AnimeBrowse() {
 
   return (
     <div className="min-h-screen">
-      <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/50 px-4 md:px-6 py-4">
+      <div className="sticky top-16 z-40 glass px-4 md:px-6 py-4">
         <div className="flex items-center gap-4 max-w-2xl">
           <div className="relative flex-1">
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -102,7 +102,7 @@ export default function AnimeBrowse() {
               placeholder="Search anime..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-card border-border"
+              className="pl-10 bg-white/5 border-white/10 text-foreground placeholder:text-muted-foreground"
             />
           </div>
           <SlidersHorizontal size={20} className="text-muted-foreground" />
@@ -119,7 +119,7 @@ export default function AnimeBrowse() {
                   "flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200",
                   activeFilter === key
                     ? "bg-primary/15 border-primary/40 text-primary"
-                    : "border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                    : "border-white/10 text-muted-foreground hover:border-primary/30 hover:text-foreground"
                 )}
               >
                 {label}

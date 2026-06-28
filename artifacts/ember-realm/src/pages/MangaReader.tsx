@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, Link } from "wouter";
-import { ChevronLeft, ChevronRight, ArrowLeft, List, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowLeft, List, ExternalLink } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,13 +20,14 @@ export default function MangaReader() {
 
   const [showChapterList, setShowChapterList] = useState(false);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
 
   const details = useGetMangaDetails(mangaId, {
     query: { enabled: !!mangaId, queryKey: getGetMangaDetailsQueryKey(mangaId) },
   });
 
-  const chapters = useGetMangaChapters(mangaId, {
+  const chapters = useGetMangaChapters(mangaId, undefined, {
     query: { enabled: !!mangaId, queryKey: getGetMangaChaptersQueryKey(mangaId) },
   });
 
@@ -34,15 +35,18 @@ export default function MangaReader() {
     query: { enabled: !!chapterId, queryKey: getGetMangaChapterPagesQueryKey(chapterId) },
   });
 
-  const currentChapterIndex = chapters.data?.chapters.findIndex((c) => c.id === chapterId) ?? -1;
-  const prevChapter = currentChapterIndex !== -1 && currentChapterIndex < (chapters.data?.chapters.length ?? 0) - 1
-    ? chapters.data?.chapters[currentChapterIndex + 1]
-    : null;
-  const nextChapter = currentChapterIndex > 0
-    ? chapters.data?.chapters[currentChapterIndex - 1]
-    : null;
-
+  const hostedChapters = chapters.data?.chapters.filter((c) => !c.isExternal) ?? [];
+  const currentChapterIndex = hostedChapters.findIndex((c) => c.id === chapterId) ?? -1;
+  const prevChapter = currentChapterIndex !== -1 && currentChapterIndex < hostedChapters.length - 1 ? hostedChapters[currentChapterIndex + 1] : null;
+  const nextChapter = currentChapterIndex > 0 ? hostedChapters[currentChapterIndex - 1] : null;
   const currentChapterData = chapters.data?.chapters.find((c) => c.id === chapterId);
+
+  useEffect(() => {
+    if (currentChapterData?.isExternal && currentChapterData?.externalUrl) {
+      window.open(currentChapterData.externalUrl, "_blank");
+      window.location.href = `/manga/${mangaId}`;
+    }
+  }, [currentChapterData, mangaId]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === "ArrowLeft" && prevChapter) {
@@ -59,21 +63,25 @@ export default function MangaReader() {
 
   useEffect(() => {
     setLoadedImages(new Set());
+    setFailedImages(new Set());
     if (containerRef.current) {
       containerRef.current.scrollTop = 0;
     }
   }, [chapterId]);
 
+  // ComicK returns absolute URLs directly; MangaDex returns filenames that need constructing.
   const pageUrls = pages.data
-    ? pages.data.pages.map(
-        (filename) =>
-          `${pages.data.baseUrl}/${pages.data.dataSaver ? "data-saver" : "data"}/${pages.data.hash}/${filename}`
-      )
+    ? (pages.data as { isAbsoluteUrls?: boolean }).isAbsoluteUrls
+      ? (pages.data.pages as string[])
+      : pages.data.pages.map(
+          (filename) =>
+            `${pages.data!.baseUrl}/${pages.data!.dataSaver ? "data-saver" : "data"}/${pages.data!.hash}/${filename}`
+        )
     : [];
 
   return (
-    <div className="min-h-screen bg-black" ref={containerRef}>
-      <div className="sticky top-0 z-50 bg-black/90 backdrop-blur-xl border-b border-white/10 px-4 py-3">
+    <div className="min-h-screen bg-[#0a0805]" ref={containerRef}>
+      <div className="sticky top-0 z-50 bg-[#0a0805]/95 backdrop-blur-xl border-b border-white/10 px-4 py-3">
         <div className="flex items-center gap-4 max-w-4xl mx-auto">
           <Link href={`/manga/${mangaId}`}>
             <button
@@ -113,9 +121,9 @@ export default function MangaReader() {
         </div>
 
         {showChapterList && (
-          <div className="absolute top-full left-0 right-0 bg-black/95 border-b border-white/10 max-h-64 overflow-y-auto">
+          <div className="absolute top-full left-0 right-0 bg-[#0a0805]/95 backdrop-blur-xl border-b border-white/10 max-h-64 overflow-y-auto">
             <div className="max-w-2xl mx-auto divide-y divide-white/5">
-              {chapters.data?.chapters.map((ch) => (
+              {chapters.data?.chapters.filter((c) => !c.isExternal).map((ch) => (
                 <Link key={ch.id} href={`/manga/read/${mangaId}/${ch.id}`}>
                   <div
                     data-testid={`reader-chapter-${ch.id}`}
@@ -132,6 +140,18 @@ export default function MangaReader() {
                   </div>
                 </Link>
               ))}
+              {(chapters.data?.chapters.filter((c) => c.isExternal).length ?? 0) > 0 && (
+                <a
+                  href={chapters.data?.chapters.filter((c) => c.isExternal)[0]?.externalUrl ?? "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2.5 text-white/50 hover:bg-white/5 transition-colors text-sm"
+                  onClick={() => setShowChapterList(false)}
+                >
+                  <ExternalLink size={14} />
+                  Official chapters on external site
+                </a>
+              )}
             </div>
           </div>
         )}
@@ -148,20 +168,45 @@ export default function MangaReader() {
           <div className="space-y-1">
             {pageUrls.map((url, idx) => (
               <div key={idx} className="relative bg-black/50">
-                {!loadedImages.has(idx) && (
+                {!loadedImages.has(idx) && !failedImages.has(idx) && (
                   <Skeleton className="w-full" style={{ height: "60vh" }} />
                 )}
-                <img
-                  src={url}
-                  alt={`Page ${idx + 1}`}
-                  data-testid={`page-${idx + 1}`}
-                  className={cn(
-                    "w-full h-auto select-none transition-opacity duration-300",
-                    loadedImages.has(idx) ? "opacity-100" : "opacity-0 absolute inset-0"
-                  )}
-                  loading="lazy"
-                  onLoad={() => setLoadedImages((prev) => new Set([...prev, idx]))}
-                />
+                {failedImages.has(idx) ? (
+                  <div
+                    className="w-full flex flex-col items-center justify-center gap-3 text-white/40 py-12"
+                    style={{ minHeight: "20vh" }}
+                  >
+                    <p className="text-sm">Page {idx + 1} failed to load</p>
+                    <button
+                      className="text-xs underline hover:text-white/70 transition-colors"
+                      onClick={() => {
+                        setFailedImages((prev) => {
+                          const next = new Set(prev);
+                          next.delete(idx);
+                          return next;
+                        });
+                      }}
+                    >
+                      Retry
+                    </button>
+                  </div>
+                ) : (
+                  <img
+                    src={url}
+                    alt={`Page ${idx + 1}`}
+                    data-testid={`page-${idx + 1}`}
+                    className={cn(
+                      "w-full h-auto select-none transition-opacity duration-300",
+                      loadedImages.has(idx) ? "opacity-100" : "opacity-0 absolute inset-0"
+                    )}
+                    loading="lazy"
+                    onLoad={() => setLoadedImages((prev) => new Set([...prev, idx]))}
+                    onError={() => {
+                      setLoadedImages((prev) => { const n = new Set(prev); n.delete(idx); return n; });
+                      setFailedImages((prev) => new Set([...prev, idx]));
+                    }}
+                  />
+                )}
               </div>
             ))}
           </div>

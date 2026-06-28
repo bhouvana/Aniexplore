@@ -1,2 +1,32 @@
+// Re-export Zod schemas (runtime validators)
 export * from "./generated/api";
-export * from "./generated/types";
+// Re-export TypeScript types (compile-time only) - avoids ambiguity with same-named Zod schemas
+export type { AnimeDetails } from "./generated/types";
+export type { AnimeDetailsNetworksItem } from "./generated/types";
+export type { AnimeItem } from "./generated/types";
+export type { AnimeListResponse } from "./generated/types";
+export type { CastMember } from "./generated/types";
+export type { ChapterItem } from "./generated/types";
+export type { ChapterListResponse } from "./generated/types";
+export type { ChapterPagesResponse } from "./generated/types";
+export type { EmbedInfo } from "./generated/types";
+export type { Episode } from "./generated/types";
+export type { EpisodeListResponse } from "./generated/types";
+export type { Genre } from "./generated/types";
+export type { GenreListResponse } from "./generated/types";
+export type { GetLatestMangaParams } from "./generated/types";
+export type { GetMangaChaptersParams } from "./generated/types";
+export type { GetPopularAnimeParams } from "./generated/types";
+export type { GetPopularMangaParams } from "./generated/types";
+export type { GetSeasonalAnimeParams } from "./generated/types";
+export type { GetTopRatedAnimeParams } from "./generated/types";
+export type { GetTrendingAnimeParams } from "./generated/types";
+export type { HealthStatus } from "./generated/types";
+export type { MangaDetails } from "./generated/types";
+export type { MangaItem } from "./generated/types";
+export type { MangaListResponse } from "./generated/types";
+export type { SearchAnimeParams } from "./generated/types";
+export type { SearchMangaParams } from "./generated/types";
+export type { Season } from "./generated/types";
+export type { VideoItem } from "./generated/types";
+export type { VideoListResponse } from "./generated/types";

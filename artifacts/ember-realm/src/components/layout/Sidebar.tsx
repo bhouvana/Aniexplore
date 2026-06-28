@@ -16,7 +16,7 @@ export default function Sidebar() {
       <div className="p-6 border-b border-sidebar-border">
         <Link href="/">
           <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent cursor-pointer select-none">
-            EmberRealm
+            Aniexplore
           </span>
         </Link>
         <p className="text-xs text-muted-foreground mt-1">Anime & Manga Platform</p>

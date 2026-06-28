@@ -23,4 +23,7 @@ export interface ChapterItem {
   translatedLanguage: string;
   /** @nullable */
   scanlationGroup?: string | null;
+  /** @nullable */
+  externalUrl?: string | null;
+  isExternal?: boolean;
 }

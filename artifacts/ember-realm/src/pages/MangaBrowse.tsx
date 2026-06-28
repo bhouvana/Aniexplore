@@ -34,7 +34,7 @@ export default function MangaBrowse() {
 
   return (
     <div className="min-h-screen">
-      <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/50 px-4 md:px-6 py-4">
+      <div className="sticky top-16 z-40 glass px-4 md:px-6 py-4">
         <div className="flex items-center gap-4 max-w-2xl">
           <div className="relative flex-1">
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -43,7 +43,7 @@ export default function MangaBrowse() {
               placeholder="Search manga..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-card border-border"
+              className="pl-10 bg-white/5 border-white/10 text-foreground placeholder:text-muted-foreground"
             />
           </div>
         </div>
@@ -79,10 +79,10 @@ export default function MangaBrowse() {
       ) : (
         <div className="py-6">
           <div className="px-4 md:px-6 mb-8">
-            <div className="rounded-2xl bg-gradient-to-r from-secondary/20 to-primary/10 border border-secondary/20 p-6">
+            <div className="rounded-2xl bg-gradient-to-r from-secondary/20 to-primary/10 border border-white/10 p-6">
               <h1 className="text-2xl md:text-3xl font-black text-foreground mb-1">Manga</h1>
               <p className="text-muted-foreground text-sm">
-                Discover thousands of manga titles powered by MangaDex
+                Discover thousands of manga titles from MangaDex & AniList — all in English
               </p>
             </div>
           </div>

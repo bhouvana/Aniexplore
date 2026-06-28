@@ -109,7 +109,7 @@ export default function AnimeDetail() {
               <img
                 src={posterUrl(d.posterPath, "w300")}
                 alt={d.name}
-                className="w-36 md:w-48 rounded-xl shadow-2xl border border-border/50"
+                className="w-36 md:w-48 rounded-xl shadow-2xl ring-1 ring-white/10"
               />
             )}
           </div>
@@ -122,8 +122,8 @@ export default function AnimeDetail() {
 
             <div className="flex flex-wrap items-center gap-3 mb-4">
               {d.voteAverage != null && d.voteAverage > 0 && (
-                <div className="flex items-center gap-1.5 bg-primary/20 border border-primary/30 rounded-full px-3 py-1">
-                  <Star size={14} className="text-primary fill-primary" />
+                <div className="flex items-center gap-1.5 glass rounded-full px-3 py-1">
+                  <Star size={14} className="text-yellow-400 fill-yellow-400" />
                   <span className="text-primary text-sm font-bold">{d.voteAverage.toFixed(1)}</span>
                   {d.voteCount && <span className="text-primary/60 text-xs">({d.voteCount.toLocaleString()})</span>}
                 </div>
@@ -139,7 +139,7 @@ export default function AnimeDetail() {
                   "px-3 py-1 rounded-full text-xs font-semibold border",
                   d.status === "Returning Series"
                     ? "bg-secondary/20 border-secondary/30 text-secondary"
-                    : "bg-muted border-border text-muted-foreground"
+                    : "bg-white/5 border-white/10 text-muted-foreground"
                 )}>
                   {d.status}
                 </span>
@@ -154,7 +154,7 @@ export default function AnimeDetail() {
 
             <div className="flex flex-wrap gap-2 mb-4">
               {d.genres?.map((g) => (
-                <span key={g.id} className="px-3 py-1 rounded-full text-xs font-semibold bg-card border border-border text-foreground/80">
+                <span key={g.id} className="px-3 py-1 rounded-full text-xs font-semibold bg-white/5 border border-white/10 text-foreground/80">
                   {g.name}
                 </span>
               ))}
@@ -164,7 +164,7 @@ export default function AnimeDetail() {
               <Link href={`/watch/${id}/1/1`}>
                 <Button
                   data-testid="detail-play-button"
-                  className="bg-primary hover:bg-primary/90 text-white font-bold shadow-[0_0_18px_rgba(249,115,22,0.4)]"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-[0_0_18px_rgba(201,154,31,0.4)]"
                 >
                   <Play size={16} className="mr-2 fill-white" />
                   Watch Now
@@ -175,7 +175,7 @@ export default function AnimeDetail() {
                   data-testid="trailer-button"
                   variant="outline"
                   onClick={() => setShowTrailer(true)}
-                  className="border-border hover:border-primary/50"
+                  className="border-white/20 hover:border-primary/50 text-foreground"
                 >
                   <Youtube size={16} className="mr-2 text-red-500" />
                   Trailer
@@ -208,7 +208,7 @@ export default function AnimeDetail() {
             <div className="flex gap-4 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
               {d.cast.slice(0, 12).map((member) => (
                 <div key={member.id} className="flex-shrink-0 w-20 text-center">
-                  <div className="w-16 h-16 rounded-full overflow-hidden mx-auto bg-card border border-border">
+                  <div className="w-16 h-16 rounded-full overflow-hidden mx-auto ring-1 ring-white/10">
                     {member.profilePath ? (
                       <img src={profileUrl(member.profilePath)} alt={member.name} className="w-full h-full object-cover" />
                     ) : (
@@ -241,7 +241,7 @@ export default function AnimeDetail() {
                         "flex-shrink-0 px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all",
                         activeSeason === s.seasonNumber
                           ? "bg-primary/20 border-primary/50 text-primary"
-                          : "border-border text-muted-foreground hover:border-primary/30"
+                          : "border-white/10 text-muted-foreground hover:border-primary/30"
                       )}
                     >
                       S{s.seasonNumber}
@@ -259,9 +259,9 @@ export default function AnimeDetail() {
                     <Link key={ep.id} href={`/watch/${id}/${ep.seasonNumber}/${ep.episodeNumber}`}>
                       <div
                         data-testid={`episode-${ep.episodeNumber}`}
-                        className="flex items-center gap-4 p-3 rounded-xl bg-card border border-border hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer group"
+                        className="flex items-center gap-4 p-3 rounded-xl glass hover:bg-white/10 transition-all cursor-pointer group"
                       >
-                        <div className="flex-shrink-0 w-20 h-12 rounded-lg overflow-hidden bg-muted">
+                        <div className="flex-shrink-0 w-20 h-12 rounded-lg overflow-hidden bg-white/5">
                           {ep.stillPath ? (
                             <img src={stillUrl(ep.stillPath)} alt={ep.name} className="w-full h-full object-cover" />
                           ) : (

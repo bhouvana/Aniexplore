@@ -24,6 +24,7 @@ import type {
   EpisodeListResponse,
   GenreListResponse,
   GetLatestMangaParams,
+  GetMangaChaptersParams,
   GetPopularAnimeParams,
   GetPopularMangaParams,
   GetSeasonalAnimeParams,
@@ -1367,20 +1368,29 @@ export function useGetMangaDetails<TData = Awaited<ReturnType<typeof getMangaDet
 
 
 
-export const getGetMangaChaptersUrl = (id: string,) => {
+export const getGetMangaChaptersUrl = (id: string,
+    params?: GetMangaChaptersParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/manga/${id}/chapters`
+  return stringifiedParams.length > 0 ? `/api/manga/${id}/chapters?${stringifiedParams}` : `/api/manga/${id}/chapters`
 }
 
 /**
- * @summary Get chapter list for a manga from MangaDex (English, first 500 chapters)
+ * @summary Get chapter list for a manga from MangaDex
  */
-export const getMangaChapters = async (id: string, options?: RequestInit): Promise<ChapterListResponse> => {
+export const getMangaChapters = async (id: string,
+    params?: GetMangaChaptersParams, options?: RequestInit): Promise<ChapterListResponse> => {
 
-  return customFetch<ChapterListResponse>(getGetMangaChaptersUrl(id),
+  return customFetch<ChapterListResponse>(getGetMangaChaptersUrl(id,params),
   {
     ...options,
     method: 'GET'
@@ -1393,23 +1403,25 @@ export const getMangaChapters = async (id: string, options?: RequestInit): Promi
 
 
 
-export const getGetMangaChaptersQueryKey = (id: string,) => {
+export const getGetMangaChaptersQueryKey = (id: string,
+    params?: GetMangaChaptersParams,) => {
     return [
-    `/api/manga/${id}/chapters`
+    `/api/manga/${id}/chapters`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetMangaChaptersQueryOptions = <TData = Awaited<ReturnType<typeof getMangaChapters>>, TError = ErrorType<unknown>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMangaChapters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetMangaChaptersQueryOptions = <TData = Awaited<ReturnType<typeof getMangaChapters>>, TError = ErrorType<unknown>>(id: string,
+    params?: GetMangaChaptersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMangaChapters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetMangaChaptersQueryKey(id);
+  const queryKey =  queryOptions?.queryKey ?? getGetMangaChaptersQueryKey(id,params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMangaChapters>>> = ({ signal }) => getMangaChapters(id, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMangaChapters>>> = ({ signal }) => getMangaChapters(id,params, { signal, ...requestOptions });
 
 
 
@@ -1423,15 +1435,16 @@ export type GetMangaChaptersQueryError = ErrorType<unknown>
 
 
 /**
- * @summary Get chapter list for a manga from MangaDex (English, first 500 chapters)
+ * @summary Get chapter list for a manga from MangaDex
  */
 
 export function useGetMangaChapters<TData = Awaited<ReturnType<typeof getMangaChapters>>, TError = ErrorType<unknown>>(
- id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMangaChapters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ id: string,
+    params?: GetMangaChaptersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMangaChapters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetMangaChaptersQueryOptions(id,options)
+  const queryOptions = getGetMangaChaptersQueryOptions(id,params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

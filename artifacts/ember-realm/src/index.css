@@ -45,17 +45,6 @@
   --color-chart-4: hsl(var(--chart-4));
   --color-chart-5: hsl(var(--chart-5));
 
-  --color-sidebar: hsl(var(--sidebar));
-  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
-  --color-sidebar-border: hsl(var(--sidebar-border));
-  --color-sidebar-primary: hsl(var(--sidebar-primary));
-  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
-  --color-sidebar-primary-border: var(--sidebar-primary-border);
-  --color-sidebar-accent: hsl(var(--sidebar-accent));
-  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
-  --color-sidebar-accent-border: var(--sidebar-accent-border);
-  --color-sidebar-ring: hsl(var(--sidebar-ring));
-
   --font-sans: var(--app-font-sans);
   --font-serif: var(--app-font-serif);
   --font-mono: var(--app-font-mono);
@@ -67,60 +56,54 @@
 }
 
 :root {
-  --button-outline: rgba(255,255,255, .08);
-  --badge-outline: rgba(255,255,255, .05);
+  /* ─── Dark / warm-black / gold palette ───────────────────────────────── */
+  --button-outline: rgba(201, 154, 31, 0.10);
+  --badge-outline: rgba(201, 154, 31, 0.06);
   --opaque-button-border-intensity: 8;
-  --elevate-1: rgba(255,255,255, .03);
-  --elevate-2: rgba(255,255,255, .07);
+  --elevate-1: rgba(255, 255, 255, 0.03);
+  --elevate-2: rgba(201, 154, 31, 0.06);
 
-  /* Deep near-black — very slight warm tint to match ember theme */
-  --background: 20 14% 4%;
-  --foreground: 30 20% 96%;
+  /* Near-black with the slightest warm undertone */
+  --background: 20 8% 5%;
+  --foreground: 36 20% 94%;
 
-  --border: 20 8% 13%;
-  --input: 20 8% 13%;
-  --ring: 24 90% 55%;
+  /* Subtle warm-tinted borders */
+  --border: 36 12% 13%;
+  --input: 36 12% 13%;
+  --ring: 43 74% 52%;
 
-  /* Slightly elevated surface */
-  --card: 20 12% 7%;
-  --card-foreground: 30 20% 96%;
-  --card-border: 20 10% 11%;
+  /* Slightly lifted dark surfaces */
+  --card: 20 8% 8%;
+  --card-foreground: 36 20% 94%;
+  --card-border: 36 12% 11%;
 
-  --sidebar: 20 14% 5%;
-  --sidebar-foreground: 30 20% 96%;
-  --sidebar-border: 20 10% 10%;
-  --sidebar-primary: 24 90% 55%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 20 10% 10%;
-  --sidebar-accent-foreground: 30 20% 96%;
-  --sidebar-ring: 24 90% 55%;
+  --popover: 20 8% 8%;
+  --popover-foreground: 36 20% 94%;
+  --popover-border: 36 12% 11%;
 
-  --popover: 20 12% 7%;
-  --popover-foreground: 30 20% 96%;
-  --popover-border: 20 10% 11%;
+  /* Gold — the hero accent colour */
+  --primary: 43 74% 52%;
+  --primary-foreground: 20 20% 8%;
 
-  /* Ember orange — the signature colour */
-  --primary: 24 90% 55%;
-  --primary-foreground: 0 0% 100%;
+  /* Muted champagne — secondary highlights */
+  --secondary: 43 38% 28%;
+  --secondary-foreground: 43 60% 82%;
 
-  /* Steel cyan — cool counterpoint */
-  --secondary: 195 80% 50%;
-  --secondary-foreground: 0 0% 100%;
+  --muted: 20 6% 12%;
+  --muted-foreground: 30 8% 52%;
 
-  --muted: 20 10% 12%;
-  --muted-foreground: 20 8% 55%;
-
-  --accent: 20 10% 12%;
-  --accent-foreground: 30 20% 96%;
+  --accent: 36 10% 12%;
+  --accent-foreground: 36 20% 90%;
 
   --destructive: 0 72% 55%;
-  --destructive-foreground: 30 20% 96%;
+  --destructive-foreground: 210 40% 96%;
 
-  --chart-1: 24 90% 55%;
-  --chart-2: 195 80% 50%;
-  --chart-3: 340 75% 55%;
+  /* Chart tones */
+  --chart-1: 43 74% 52%;
+  --chart-2: 36 80% 60%;
+  --chart-3: 330 75% 55%;
   --chart-4: 155 65% 42%;
-  --chart-5: 45 88% 50%;
+  --chart-5: 20 70% 50%;
 
   --app-font-sans: 'Inter', system-ui, sans-serif;
   --app-font-serif: Georgia, serif;
@@ -128,23 +111,20 @@
 
   --radius: 0.625rem;
 
-  --shadow-2xs: 0 1px 2px rgba(0,0,0,0.6);
-  --shadow-xs:  0 1px 3px rgba(0,0,0,0.6);
-  --shadow-sm:  0 1px 4px rgba(0,0,0,0.7);
-  --shadow:     0 2px 6px rgba(0,0,0,0.7);
-  --shadow-md:  0 4px 10px rgba(0,0,0,0.7);
-  --shadow-lg:  0 6px 16px rgba(0,0,0,0.75);
-  --shadow-xl:  0 10px 28px rgba(0,0,0,0.8);
-  --shadow-2xl: 0 18px 40px rgba(0,0,0,0.85);
+  --shadow-2xs: 0 1px 2px rgba(0, 0, 0, 0.7);
+  --shadow-xs:  0 1px 3px rgba(0, 0, 0, 0.7);
+  --shadow-sm:  0 1px 4px rgba(0, 0, 0, 0.8);
+  --shadow:     0 2px 6px rgba(0, 0, 0, 0.8);
+  --shadow-md:  0 4px 10px rgba(0, 0, 0, 0.8);
+  --shadow-lg:  0 6px 16px rgba(0, 0, 0, 0.85);
+  --shadow-xl:  0 10px 28px rgba(0, 0, 0, 0.88);
+  --shadow-2xl: 0 18px 40px rgba(0, 0, 0, 0.92);
 
-  /* Computed border variants */
-  --primary-border: hsl(24 90% 45%);
-  --secondary-border: hsl(195 80% 42%);
-  --muted-border: hsl(20 8% 10%);
-  --accent-border: hsl(20 8% 10%);
+  --primary-border: hsl(43 74% 40%);
+  --secondary-border: hsl(43 38% 20%);
+  --muted-border: hsl(20 6% 10%);
+  --accent-border: hsl(36 10% 10%);
   --destructive-border: hsl(0 72% 45%);
-  --sidebar-primary-border: hsl(24 90% 45%);
-  --sidebar-accent-border: hsl(20 8% 10%);
 
   --tracking-normal: 0em;
   --spacing: 0.25rem;
@@ -158,12 +138,52 @@
     font-feature-settings: "cv11", "ss01";
   }
 
-  /* Refined scrollbar */
+  /* Gold-tinted scrollbar */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--border));
+    background: hsl(43 40% 18%);
     border-radius: 999px;
   }
-  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.5); }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(43 60% 32%); }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .animate-fade-in { animation: fade-in 0.5s ease-out; }
+  .animate-slide-up { animation: slide-up 0.5s ease-out; }
+  .animate-scale-in { animation: scale-in 0.3s ease-out; }
+
+  /* Glassmorphism with a warm dark base and golden border shimmer */
+  .glass {
+    background: rgba(13, 10, 6, 0.78);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(201, 154, 31, 0.14);
+  }
+
+  .glass-hover:hover {
+    background: rgba(18, 14, 8, 0.88);
+    border-color: rgba(201, 154, 31, 0.26);
+  }
+
+  /* Gold gradient — used on logo text and highlights */
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(43 74% 56%), hsl(36 90% 70%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 }

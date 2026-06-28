@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Star } from "lucide-react";
+import { Star, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MangaCardProps {
@@ -18,16 +18,16 @@ export default function MangaCard({ id, title, coverUrl, rating, status, lastCha
       <div
         data-testid={`card-manga-${id}`}
         className={cn(
-          "group relative flex-shrink-0 w-36 md:w-44 cursor-pointer overflow-hidden rounded-xl transition-transform duration-300 hover:scale-105",
+          "group relative flex-shrink-0 w-36 md:w-44 cursor-pointer animate-fade-in",
           className
         )}
       >
-        <div className="relative aspect-[2/3] bg-card overflow-hidden rounded-xl">
+        <div className="relative aspect-[2/3] bg-card overflow-hidden rounded-xl ring-1 ring-white/5 group-hover:ring-white/20 transition-all duration-300 group-hover:shadow-2xl">
           {coverUrl ? (
             <img
               src={coverUrl}
               alt={title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
               loading="lazy"
             />
           ) : (
@@ -36,39 +36,46 @@ export default function MangaCard({ id, title, coverUrl, rating, status, lastCha
             </div>
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Hover overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-            <p className="text-white text-xs font-semibold line-clamp-2 leading-tight">{title}</p>
-            {lastChapter && <p className="text-secondary text-xs mt-0.5">Ch. {lastChapter}</p>}
+          {/* Read icon on hover */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+            <div className="w-11 h-11 rounded-full bg-amber-400/12 backdrop-blur-sm border border-amber-400/35 flex items-center justify-center">
+              <BookOpen size={15} className="text-amber-100" />
+            </div>
           </div>
 
+          {/* Rating badge — top left */}
           {rating != null && rating > 0 && (
-            <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/70 backdrop-blur-sm rounded-full px-2 py-1">
+            <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/75 backdrop-blur-sm rounded-full px-2 py-0.5">
               <Star size={10} className="text-yellow-400 fill-yellow-400" />
-              <span className="text-white text-xs font-bold">{rating.toFixed(1)}</span>
+              <span className="text-white text-xs font-bold">{rating.toFixed(2)}</span>
             </div>
           )}
 
+          {/* Status badge — top right */}
           {status && (
             <div
               className={cn(
-                "absolute top-2 left-2 rounded-full px-2 py-0.5 text-xs font-bold",
-                status === "ongoing" ? "bg-secondary/20 text-secondary border border-secondary/30" : "bg-muted text-muted-foreground"
+                "absolute top-2 right-2 rounded-full px-2 py-0.5 text-[10px] font-bold",
+                status === "ongoing"
+                  ? "bg-secondary/25 text-secondary border border-secondary/30"
+                  : "bg-black/50 text-white/60 border border-white/10"
               )}
             >
               {status}
             </div>
           )}
-
-          <div className="absolute inset-0 rounded-xl ring-0 group-hover:ring-1 ring-secondary/50 group-hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] transition-all duration-300" />
         </div>
 
         <div className="mt-2 px-0.5">
-          <p className="text-sm font-medium text-foreground/90 line-clamp-2 leading-tight group-hover:text-secondary transition-colors">
+          <p className="text-sm font-medium text-foreground/90 line-clamp-2 leading-tight group-hover:text-white transition-colors">
             {title}
           </p>
-          {lastChapter && <p className="text-xs text-muted-foreground mt-0.5">Ch. {lastChapter}</p>}
+          {lastChapter && (
+            <p className="text-xs text-muted-foreground mt-0.5">Ch. {lastChapter}</p>
+          )}
         </div>
       </div>
     </Link>

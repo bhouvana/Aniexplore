@@ -352,13 +352,24 @@ paths:
     get:
       operationId: getMangaChapters
       tags: [manga]
-      summary: Get chapter list for a manga from MangaDex (English, first 500 chapters)
+      summary: Get chapter list for a manga from MangaDex
       parameters:
         - in: path
           name: id
           required: true
           schema:
             type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
       responses:
         "200":
           description: Chapter list
@@ -646,6 +657,21 @@ components:
           type: integer
         season:
           type: integer
+        providers:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              embedUrl:
+                type: string
+            required:
+              - id
+              - name
+              - embedUrl
       required:
         - embedUrl
         - type
@@ -773,6 +799,10 @@ components:
           type: string
         scanlationGroup:
           type: ["string", "null"]
+        externalUrl:
+          type: ["string", "null"]
+        isExternal:
+          type: boolean
       required:
         - id
         - translatedLanguage

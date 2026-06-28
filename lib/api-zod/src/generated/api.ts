@@ -314,7 +314,12 @@ export const GetAnimeEmbedUrlResponse = zod.object({
   "type": zod.string(),
   "tmdbId": zod.number(),
   "episode": zod.number(),
-  "season": zod.number()
+  "season": zod.number(),
+  "providers": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "embedUrl": zod.string()
+})).optional()
 })
 
 
@@ -445,10 +450,20 @@ export const GetMangaDetailsResponse = zod.object({
 
 
 /**
- * @summary Get chapter list for a manga from MangaDex (English, first 500 chapters)
+ * @summary Get chapter list for a manga from MangaDex
  */
 export const GetMangaChaptersParams = zod.object({
   "id": zod.coerce.string()
+})
+
+export const getMangaChaptersQueryLimitDefault = 100;
+export const getMangaChaptersQueryLimitMax = 100;
+
+export const getMangaChaptersQueryOffsetDefault = 0;
+
+export const GetMangaChaptersQueryParams = zod.object({
+  "limit": zod.coerce.number().max(getMangaChaptersQueryLimitMax).default(getMangaChaptersQueryLimitDefault),
+  "offset": zod.coerce.number().default(getMangaChaptersQueryOffsetDefault)
 })
 
 export const GetMangaChaptersResponse = zod.object({
@@ -461,7 +476,9 @@ export const GetMangaChaptersResponse = zod.object({
   "readableAt": zod.string().nullish(),
   "pages": zod.number().nullish(),
   "translatedLanguage": zod.string(),
-  "scanlationGroup": zod.string().nullish()
+  "scanlationGroup": zod.string().nullish(),
+  "externalUrl": zod.string().nullish(),
+  "isExternal": zod.boolean().optional()
 })),
   "total": zod.number(),
   "limit": zod.number(),

@@ -5,6 +5,7 @@
  * EmberRealm - Anime & Manga streaming platform API proxy
  * OpenAPI spec version: 0.1.0
  */
+import type { EmbedInfoProvidersItem } from './embedInfoProvidersItem';
 
 export interface EmbedInfo {
   embedUrl: string;
@@ -12,4 +13,5 @@ export interface EmbedInfo {
   tmdbId: number;
   episode: number;
   season: number;
+  providers?: EmbedInfoProvidersItem[];
 }

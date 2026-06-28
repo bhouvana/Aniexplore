@@ -9,7 +9,7 @@ export default function ContinueWatchingRow() {
   if (items.length === 0) return null;
 
   return (
-    <section className="mb-10">
+    <section className="mb-10 animate-slide-up">
       <h2 className="text-lg md:text-xl font-bold text-foreground mb-4 px-4 md:px-6">
         Continue Watching
       </h2>
@@ -24,7 +24,7 @@ export default function ContinueWatchingRow() {
             className="group relative flex-shrink-0 w-48 md:w-56"
           >
             <Link href={`/watch/${item.tmdbId}/${item.seasonNumber}/${item.episodeNumber}`}>
-              <div className="relative rounded-xl overflow-hidden cursor-pointer aspect-video bg-card">
+              <div className="relative rounded-xl overflow-hidden cursor-pointer aspect-video ring-1 ring-white/10 group-hover:ring-primary/40 transition-all">
                 {item.posterPath ? (
                   <img
                     src={posterUrl(item.posterPath, "w300")}
@@ -34,14 +34,12 @@ export default function ContinueWatchingRow() {
                 ) : (
                   <div className="w-full h-full bg-card" />
                 )}
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <div className="w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.5)]">
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center shadow-[0_0_20px_rgba(201,154,31,0.5)]">
                     <Play size={18} className="fill-white text-white ml-0.5" />
                   </div>
                 </div>
-                <div
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-primary/30"
-                >
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary/30">
                   <div
                     className="h-full bg-primary transition-all"
                     style={{ width: `${(item.progress ?? 0) * 100}%` }}

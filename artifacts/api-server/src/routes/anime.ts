@@ -1,11 +1,11 @@
 import { Router } from "express";
+import { withCache, TTL } from "../lib/cache";
 
 const router = Router();
 
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const TMDB_API_KEY = process.env.TMDB_API_KEY ?? "";
 
-// Genre 16 = Animation, Japanese-original language — tight anime filter
 const ANIME_PARAMS = {
   with_genres: "16",
   with_original_language: "ja",
@@ -42,12 +42,14 @@ function mapTVItem(item: Record<string, unknown>) {
   };
 }
 
-function mapListResponse(data: {
+type TMDBListRaw = {
   results: Record<string, unknown>[];
   page: number;
   total_pages: number;
   total_results: number;
-}) {
+};
+
+function mapListResponse(data: TMDBListRaw) {
   return {
     results: data.results.map(mapTVItem),
     page: data.page,
@@ -59,9 +61,11 @@ function mapListResponse(data: {
 // GET /anime/genres
 router.get("/genres", async (req, res) => {
   try {
-    const data = await tmdbFetch<{ genres: { id: number; name: string }[] }>(
-      "/genre/tv/list",
-      { language: "en-US" }
+    const data = await withCache("anime:genres", TTL.DETAILS, () =>
+      tmdbFetch<{ genres: { id: number; name: string }[] }>(
+        "/genre/tv/list",
+        { language: "en-US" }
+      )
     );
     res.json({ genres: data.genres });
   } catch (err) {
@@ -70,20 +74,17 @@ router.get("/genres", async (req, res) => {
   }
 });
 
-// GET /anime/trending — uses discover sorted by popularity (trending supports no genre filter)
+// GET /anime/trending
 router.get("/trending", async (req, res) => {
   const page = Number(req.query["page"] ?? 1);
   try {
-    const data = await tmdbFetch<{
-      results: Record<string, unknown>[];
-      page: number;
-      total_pages: number;
-      total_results: number;
-    }>("/discover/tv", {
-      page,
-      ...ANIME_PARAMS,
-      sort_by: "popularity.desc",
-    });
+    const data = await withCache(`anime:trending:${page}`, TTL.TRENDING, () =>
+      tmdbFetch<TMDBListRaw>("/discover/tv", {
+        page,
+        ...ANIME_PARAMS,
+        sort_by: "popularity.desc",
+      })
+    );
     res.json(mapListResponse(data));
   } catch (err) {
     req.log.error({ err }, "Failed to fetch trending");
@@ -95,17 +96,14 @@ router.get("/trending", async (req, res) => {
 router.get("/popular", async (req, res) => {
   const page = Number(req.query["page"] ?? 1);
   try {
-    const data = await tmdbFetch<{
-      results: Record<string, unknown>[];
-      page: number;
-      total_pages: number;
-      total_results: number;
-    }>("/discover/tv", {
-      page,
-      ...ANIME_PARAMS,
-      sort_by: "popularity.desc",
-      "vote_count.gte": 50,
-    });
+    const data = await withCache(`anime:popular:${page}`, TTL.POPULAR, () =>
+      tmdbFetch<TMDBListRaw>("/discover/tv", {
+        page,
+        ...ANIME_PARAMS,
+        sort_by: "popularity.desc",
+        "vote_count.gte": 50,
+      })
+    );
     res.json(mapListResponse(data));
   } catch (err) {
     req.log.error({ err }, "Failed to fetch popular");
@@ -117,17 +115,14 @@ router.get("/popular", async (req, res) => {
 router.get("/top-rated", async (req, res) => {
   const page = Number(req.query["page"] ?? 1);
   try {
-    const data = await tmdbFetch<{
-      results: Record<string, unknown>[];
-      page: number;
-      total_pages: number;
-      total_results: number;
-    }>("/discover/tv", {
-      page,
-      ...ANIME_PARAMS,
-      sort_by: "vote_average.desc",
-      "vote_count.gte": 200,
-    });
+    const data = await withCache(`anime:top-rated:${page}`, TTL.TOP_RATED, () =>
+      tmdbFetch<TMDBListRaw>("/discover/tv", {
+        page,
+        ...ANIME_PARAMS,
+        sort_by: "vote_average.desc",
+        "vote_count.gte": 200,
+      })
+    );
     res.json(mapListResponse(data));
   } catch (err) {
     req.log.error({ err }, "Failed to fetch top-rated");
@@ -135,26 +130,23 @@ router.get("/top-rated", async (req, res) => {
   }
 });
 
-// GET /anime/seasonal — currently airing Japanese animation
+// GET /anime/seasonal
 router.get("/seasonal", async (req, res) => {
   const page = Number(req.query["page"] ?? 1);
   const now = new Date();
   const monthAgo = new Date(now);
   monthAgo.setMonth(monthAgo.getMonth() - 4);
-  const airDateGte = monthAgo.toISOString().split("T")[0];
+  const airDateGte = monthAgo.toISOString().split("T")[0]!;
 
   try {
-    const data = await tmdbFetch<{
-      results: Record<string, unknown>[];
-      page: number;
-      total_pages: number;
-      total_results: number;
-    }>("/discover/tv", {
-      page,
-      ...ANIME_PARAMS,
-      sort_by: "popularity.desc",
-      "first_air_date.gte": airDateGte,
-    });
+    const data = await withCache(`anime:seasonal:${page}:${airDateGte}`, TTL.SEASONAL, () =>
+      tmdbFetch<TMDBListRaw>("/discover/tv", {
+        page,
+        ...ANIME_PARAMS,
+        sort_by: "popularity.desc",
+        "first_air_date.gte": airDateGte,
+      })
+    );
     res.json(mapListResponse(data));
   } catch (err) {
     req.log.error({ err }, "Failed to fetch seasonal");
@@ -171,13 +163,9 @@ router.get("/search", async (req, res) => {
     return;
   }
   try {
-    const data = await tmdbFetch<{
-      results: Record<string, unknown>[];
-      page: number;
-      total_pages: number;
-      total_results: number;
-    }>("/search/tv", { query: q, page });
-    // Filter to animation or Japanese originals when possible
+    const data = await withCache(`anime:search:${q}:${page}`, TTL.SEARCH, () =>
+      tmdbFetch<TMDBListRaw>("/search/tv", { query: q, page })
+    );
     const filtered = data.results.filter((r) => {
       const genres = (r["genre_ids"] as number[]) ?? [];
       const lang = r["original_language"] as string;
@@ -193,17 +181,14 @@ router.get("/search", async (req, res) => {
   }
 });
 
-// Sub-routes BEFORE /:id
+// GET /anime/:id/recommendations
 router.get("/:id/recommendations", async (req, res) => {
   const id = Number(req.params["id"]);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
   try {
-    const data = await tmdbFetch<{
-      results: Record<string, unknown>[];
-      page: number;
-      total_pages: number;
-      total_results: number;
-    }>(`/tv/${id}/recommendations`);
+    const data = await withCache(`anime:${id}:recommendations`, TTL.RECOMMENDATIONS, () =>
+      tmdbFetch<TMDBListRaw>(`/tv/${id}/recommendations`)
+    );
     res.json(mapListResponse(data));
   } catch (err) {
     req.log.error({ err }, "Failed to fetch recommendations");
@@ -211,13 +196,16 @@ router.get("/:id/recommendations", async (req, res) => {
   }
 });
 
+// GET /anime/:id/videos
 router.get("/:id/videos", async (req, res) => {
   const id = Number(req.params["id"]);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
   try {
-    const data = await tmdbFetch<{
-      results: { id: string; name: string; key: string; site: string; type: string; official: boolean }[];
-    }>(`/tv/${id}/videos`, { language: "en-US" });
+    const data = await withCache(`anime:${id}:videos`, TTL.VIDEOS, () =>
+      tmdbFetch<{
+        results: { id: string; name: string; key: string; site: string; type: string; official: boolean }[];
+      }>(`/tv/${id}/videos`, { language: "en-US" })
+    );
     res.json({ results: data.results });
   } catch (err) {
     req.log.error({ err }, "Failed to fetch videos");
@@ -225,6 +213,7 @@ router.get("/:id/videos", async (req, res) => {
   }
 });
 
+// GET /anime/:id/seasons/:seasonNumber/episodes
 router.get("/:id/seasons/:seasonNumber/episodes", async (req, res) => {
   const id = Number(req.params["id"]);
   const seasonNumber = Number(req.params["seasonNumber"]);
@@ -232,11 +221,13 @@ router.get("/:id/seasons/:seasonNumber/episodes", async (req, res) => {
     res.status(400).json({ error: "Invalid params" }); return;
   }
   try {
-    const data = await tmdbFetch<{
-      name: string;
-      season_number: number;
-      episodes: Record<string, unknown>[];
-    }>(`/tv/${id}/season/${seasonNumber}`);
+    const data = await withCache(`anime:${id}:season:${seasonNumber}:episodes`, TTL.EPISODES, () =>
+      tmdbFetch<{
+        name: string;
+        season_number: number;
+        episodes: Record<string, unknown>[];
+      }>(`/tv/${id}/season/${seasonNumber}`)
+    );
     res.json({
       name: data.name,
       seasonNumber: data.season_number,
@@ -258,6 +249,56 @@ router.get("/:id/seasons/:seasonNumber/episodes", async (req, res) => {
   }
 });
 
+interface VideoProviderConfig {
+  id: string;
+  name: string;
+  getUrl: (tmdbId: number, season: number, episode: number) => string;
+}
+
+const VIDEO_PROVIDERS: VideoProviderConfig[] = [
+  {
+    id: "vidsrc-to",
+    name: "Server 1",
+    getUrl: (id, s, e) => `https://vidsrc.to/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    id: "vidsrc-cc",
+    name: "Server 2",
+    getUrl: (id, s, e) => `https://vidsrc.cc/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    id: "vidsrc-xyz",
+    name: "Server 3",
+    getUrl: (id, s, e) => `https://vidsrc.xyz/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    id: "vidlink",
+    name: "Server 4",
+    getUrl: (id, s, e) => `https://vidlink.pro/tv/${id}/${s}/${e}`,
+  },
+  {
+    id: "embed-su",
+    name: "Server 5",
+    getUrl: (id, s, e) => `https://embed.su/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    id: "autoembed",
+    name: "Server 6",
+    getUrl: (id, s, e) => `https://autoembed.co/tv/tmdb/${id}-${s}-${e}`,
+  },
+  {
+    id: "2embed",
+    name: "Server 7",
+    getUrl: (id, s, e) => `https://www.2embed.cc/embedtv/${id}?s=${s}&e=${e}`,
+  },
+  {
+    id: "multiembed",
+    name: "Server 8",
+    getUrl: (id, s, e) => `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`,
+  },
+];
+
+// GET /anime/:id/embed/:season/:episode
 router.get("/:id/embed/:season/:episode", async (req, res) => {
   const id = Number(req.params["id"]);
   const season = Number(req.params["season"]);
@@ -265,19 +306,35 @@ router.get("/:id/embed/:season/:episode", async (req, res) => {
   if (isNaN(id) || isNaN(season) || isNaN(episode)) {
     res.status(400).json({ error: "Invalid params" }); return;
   }
-  const embedUrl = `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`;
-  res.json({ embedUrl, type: "iframe", tmdbId: id, season, episode });
+
+  const providers = VIDEO_PROVIDERS.map((p) => ({
+    id: p.id,
+    name: p.name,
+    embedUrl: p.getUrl(id, season, episode),
+  }));
+
+  res.json({
+    embedUrl: providers[0]!.embedUrl,
+    providers,
+    tmdbId: id,
+    season,
+    episode,
+    type: "iframe",
+  });
 });
 
-// GET /anime/:id — LAST
+// GET /anime/:id — must be last
 router.get("/:id", async (req, res) => {
   const id = Number(req.params["id"]);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
   try {
-    const [details, credits] = await Promise.all([
-      tmdbFetch<Record<string, unknown>>(`/tv/${id}`, { append_to_response: "recommendations" }),
-      tmdbFetch<{ cast: Record<string, unknown>[] }>(`/tv/${id}/credits`),
-    ]);
+    const [details, credits] = await withCache(`anime:${id}:details`, TTL.DETAILS, () =>
+      Promise.all([
+        tmdbFetch<Record<string, unknown>>(`/tv/${id}`, { append_to_response: "recommendations" }),
+        tmdbFetch<{ cast: Record<string, unknown>[] }>(`/tv/${id}/credits`),
+      ])
+    );
+
     const rawRecommendations = (
       (details["recommendations"] as { results: Record<string, unknown>[] }) ?? { results: [] }
     ).results;

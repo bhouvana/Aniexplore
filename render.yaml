@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: aniexplore
+    runtime: node
+    region: oregon
+
+    # Render sets $PORT automatically; NODE_VERSION selects the runtime
+    buildCommand: >-
+      npm install -g pnpm &&
+      pnpm install --frozen-lockfile &&
+      pnpm --filter @workspace/ember-realm build &&
+      pnpm --filter @workspace/api-server build
+
+    startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
+
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      # Set TMDB_API_KEY in the Render dashboard (keep it secret)
+      - key: TMDB_API_KEY
+        sync: false
+      # Optional: restrict CORS to your Render domain once deployed
+      # - key: CORS_ORIGINS
+      #   value: https://aniexplore.onrender.com

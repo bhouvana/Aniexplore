@@ -141,12 +141,19 @@ export interface EpisodeListResponse {
   name: string;
 }
 
+export type EmbedInfoProvidersItem = {
+  id: string;
+  name: string;
+  embedUrl: string;
+};
+
 export interface EmbedInfo {
   embedUrl: string;
   type: string;
   tmdbId: number;
   episode: number;
   season: number;
+  providers?: EmbedInfoProvidersItem[];
 }
 
 export interface GenreListResponse {
@@ -220,6 +227,9 @@ export interface ChapterItem {
   translatedLanguage: string;
   /** @nullable */
   scanlationGroup?: string | null;
+  /** @nullable */
+  externalUrl?: string | null;
+  isExternal?: boolean;
 }
 
 export interface ChapterListResponse {
@@ -270,6 +280,14 @@ offset?: number;
 };
 
 export type GetLatestMangaParams = {
+limit?: number;
+offset?: number;
+};
+
+export type GetMangaChaptersParams = {
+/**
+ * @maximum 100
+ */
 limit?: number;
 offset?: number;
 };
