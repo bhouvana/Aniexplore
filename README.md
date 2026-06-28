@@ -14,6 +14,8 @@
 **A full-stack anime streaming and manga reading platform built with a modern monorepo.**  
 Browse trending anime, watch with multiple embed providers, and read manga — all in one dark gold experience.
 
+[🌐 Live Demo](https://aniexplore.onrender.com) · [Report Bug](https://github.com/bhouvana/Aniexplore/issues) · [Request Feature](https://github.com/bhouvana/Aniexplore/issues)
+
 </div>
 
 ---
