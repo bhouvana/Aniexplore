@@ -3,6 +3,7 @@ services:
     name: aniexplore
     runtime: node
     region: oregon
+    plan: free
 
     # Render sets $PORT automatically; NODE_VERSION selects the runtime
     buildCommand: >-
